@@ -7,8 +7,8 @@ class Application():
     def __init__(self):
 
         self.pages = {
-            'pagina': self.pagina,
             'portal': self.portal,
+            'pagina': self.pagina,
             'chat': self.chat,
             'edit': self.edit
         }
@@ -18,14 +18,10 @@ class Application():
 
 
     def render(self,page,parameter=None):
-        content = self.pages.get(page, self.helper)
+        content = self.pages.get(page, self.portal)
         if not parameter:
             return content()
         return content(parameter)
-
-
-    def helper(self):
-        return template('app/views/html/helper')
 
 
     def getCurrentUserBySessionId(self):

@@ -26,10 +26,6 @@ def serve_static(filepath):
     return static_file(filepath, root='./app/static')
 
 
-@server.app.route('/helper')
-def helper():
-    return ctl.render('helper')
-
 # ------------------------------------------------------------------------------
 # Rota para Socket.IO WebSocket (não precisa de rota específica)
 
@@ -62,6 +58,7 @@ def chat_getter():
     return ctl.render('chat')
 
 
+@server.app.route('/')
 @server.app.route('/portal', method='GET')
 def login():
     return ctl.render('portal')

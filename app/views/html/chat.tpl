@@ -18,6 +18,7 @@
             <li>{{message.content}} | escrita por: {{message.username}}</li>
         % end
     </div>
+  </br>
     <form action="/portal" method="get">
         <button type="submit">Portal</button>
     </form>

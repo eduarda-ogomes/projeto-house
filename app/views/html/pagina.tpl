@@ -32,6 +32,10 @@
         </div>
     % else:
         <h2>Realize o LOGIN para ter acesso aos seus dados pessoais. Acesse nosso portal em '/portal' :) </h2>
+      </br>
+      <form action="/portal" method="get">
+          <button type="submit">Portal</button>
+      </form>
     % end
 </body>
 </html>
