@@ -11,11 +11,15 @@ socket.on('message', (data) => {
     displayMessage(data.content, data.username);
 });
 
+socket.on('updateUsers', (users) => {
+    updateUserList(users);
+});
+
 function sendMessage() {
     const messageInput = document.getElementById('messageInput');
     const message = messageInput.value;
     socket.emit('message', message);
-    messageInput.value = ''; // Limpa o campo após o envio
+    messageInput.value = '';
 }
 
 function displayMessage(message,user) {
@@ -23,5 +27,15 @@ function displayMessage(message,user) {
    messageDisplay.innerHTML += `<li>${message} | escrita por: ${user}</li>`;
 }
 
-// Adiciona o listener de evento ao botão
+function updateUserList(users) {
+    const usersDisplay = document.getElementById('usersDisplay');
+    usersDisplay.innerHTML = '';
+
+    users.forEach(user => {
+        const listItem = document.createElement('li');
+        listItem.textContent = user;
+        usersDisplay.appendChild(listItem);
+    });
+}
+
 button.addEventListener('click', sendMessage);

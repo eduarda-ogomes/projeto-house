@@ -29,3 +29,27 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 2000);
     }
 });
+
+// WebSocket:
+
+const socket = io('http://localhost:8080');
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.querySelector('form');
+    const loginButton = document.getElementById('setUsers');
+
+    if (loginForm && loginButton) {
+        loginButton.addEventListener('click', (event) => {
+            const usernameInput = document.getElementById('username').value;
+
+            if (usernameInput) {
+                // Envia o username via WebSocket
+                socket.emit('login', { username: usernameInput });
+                alert('Login anunciado');
+            }
+            loginForm.submit();
+        });
+    } else {
+        console.error('Form or login button not found');
+    }
+});

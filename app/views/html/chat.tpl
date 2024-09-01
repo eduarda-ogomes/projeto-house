@@ -10,6 +10,8 @@
 </head>
 <body>
     <h1>{{current_user.username}}, experiemente este Chat em tempo real :)</h1>
+    <h4>Os usuários conectados aparecerão abaixo:</h4>
+    <div id="usersDisplay"></div>
     <input type="text" id="messageInput" placeholder="Digite sua mensagem">
     <button id="sendButton">Enviar</button>
     <h2>Mensagens anteriores:</h2>

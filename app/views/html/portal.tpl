@@ -40,7 +40,7 @@
           <label for="password">Senha:</label>
           <input id="password" name="password" type="password" required /><br>
           </br>
-          <input value="Login" type="submit" />
+          <input id="setUsers" value="Login" type="submit" />
       </form>
     </div>
     % end

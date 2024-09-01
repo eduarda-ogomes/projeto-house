@@ -24,6 +24,10 @@ class Application():
         return content(parameter)
 
 
+    def getAuthenticatedUsers(self):
+        return sefl.__users.getAuthenticatedUsers()
+
+
     def getCurrentUserBySessionId(self):
         session_id= request.get_cookie('session_id')
         return self.__users.getCurrentUser(session_id)
@@ -98,7 +102,11 @@ class Application():
         redirect('/portal')
 
 
-    def newMessage(self,message):
-        content= message.encode('latin-1').decode('utf-8')
-        current_user= self.getCurrentUserBySessionId()
-        return self.__messages.book(current_user.username,content)
+    def newMessage(self, message):
+        try:
+            content = message
+            current_user = self.getCurrentUserBySessionId()
+            return self.__messages.book(current_user.username, content)
+        except UnicodeEncodeError as e:
+            print(f"Encoding error: {e}")
+            return "An error occurred while processing the message."
