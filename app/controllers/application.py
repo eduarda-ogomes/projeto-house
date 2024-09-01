@@ -4,7 +4,9 @@ import socketio
 
 
 class Application:
+
     def __init__(self):
+
         self.pages = {
             'portal': self.portal,
             'pagina': self.pagina,
@@ -26,10 +28,16 @@ class Application:
         # Create WSGI app
         self.wsgi_app = socketio.WSGIApp(self.sio, self.app)
 
+
+    # estabelecimento das rotas
     def setup_routes(self):
         @self.app.route('/static/<filepath:path>')
         def serve_static(filepath):
             return static_file(filepath, root='./app/static')
+
+        @self.app.route('/favicon.ico')
+        def favicon():
+            return static_file('favicon.ico', root='.app/static')
 
         @self.app.route('/pagina', method='GET')
         def pagina_getter():
@@ -53,53 +61,30 @@ class Application:
             username = request.forms.get('username')
             password = request.forms.get('password')
             self.authenticate_user(username, password)
-            return self.render('portal')  # Adicione uma resposta apropriada
+            return self.render('portal')
 
         @self.app.route('/edit', method='POST')
         def edit_post():
             username = request.forms.get('username')
             password = request.forms.get('password')
             self.update_user(username, password)
-            return self.render('edit')  # Adicione uma resposta apropriada
+            return self.render('edit')
 
         @self.app.route('/logout', method='POST')
         def logout_action():
             self.logout_user()
             return self.render('portal')
 
-    def setup_websocket_events(self):
-        @self.sio.event
-        async def connect(sid, environ):
-            print(f'Client connected: {sid}')
-            self.sio.emit('connected', {'data': 'Connected'}, room=sid)
 
-        @self.sio.event
-        async def disconnect(sid):
-            print(f'Client disconnected: {sid}')
-
-        @self.sio.event
-        def message(sid, data):
-            print(f'SIO.EVENT: Fui disparada pelo chat com: {data}')
-            objdata = self.newMessage(data)
-            self.sio.emit('message', {'content': objdata.content, 'username': objdata.username})
-
-        @self.sio.event
-        def login(sid, data):
-            print(f'Login event received from app: {data}')
-            username = data.get('username')
-            if username:
-                self.broadcast_user_list()
-
-    def broadcast_user_list(self):
-        users = self.getAuthenticatedUsers()
-        self.sio.emit('updateUsers', {'users': [user.username for user in users]})
-
+    # método controlador de acesso às páginas:
     def render(self, page, parameter=None):
         content = self.pages.get(page, self.portal)
         if not parameter:
             return content()
         return content(parameter)
 
+
+    # métodos controladores de páginas
     def getAuthenticatedUsers(self):
         return self.__users.getAuthenticatedUsers()
 
@@ -122,6 +107,7 @@ class Application:
         return portal_render
 
     def pagina(self):
+        self.update_users_list()
         current_user = self.getCurrentUserBySessionId()
         if current_user:
             return template('app/views/html/pagina', transfered=True, current_user=current_user)
@@ -141,9 +127,6 @@ class Application:
             redirect('/pagina')
         redirect('/portal')
 
-    def login(self):
-        return template('app/views/html/login')
-
     def update_user(self, username, password):
         self.__users.setUser(username, password)
         self.edited = True
@@ -153,12 +136,15 @@ class Application:
         session_id = request.get_cookie('session_id')
         self.__users.logout(session_id)
         response.delete_cookie('session_id')
+        self.update_users_list()
 
     def chat(self):
         current_user = self.getCurrentUserBySessionId()
         if current_user:
             messages = self.__messages.getUsersMessages()
-            return template('app/views/html/chat', current_user=current_user, messages=messages)
+            auth_users= self.__users.getAuthenticatedUsers().values()
+            return template('app/views/html/chat', current_user=current_user, \
+            messages=messages, auth_users=auth_users)
         redirect('/portal')
 
     def newMessage(self, message):
@@ -169,3 +155,37 @@ class Application:
         except UnicodeEncodeError as e:
             print(f"Encoding error: {e}")
             return "An error occurred while processing the message."
+
+
+    # Websocket:
+    def setup_websocket_events(self):
+
+        @self.sio.event
+        async def connect(sid, environ):
+            print(f'Client connected: {sid}')
+            self.sio.emit('connected', {'data': 'Connected'}, room=sid)
+
+        @self.sio.event
+        async def disconnecupdate_users_listt(sid):
+            print(f'Client disconnected: {sid}')
+
+        # recebimento de solicitação de cliente para atualização das mensagens
+        @self.sio.event
+        def message(sid, data):
+            objdata = self.newMessage(data)
+            self.sio.emit('message', {'content': objdata.content, 'username': objdata.username})
+
+        # solicitação para atualização da lista de usuários conectados. Quem faz
+        # esta solicitação é o próprio controlador. Ver update_users_list()
+        @self.sio.event
+        def update_users_event(sid, data):
+            self.sio.emit('update_users_event', {'content': data})
+
+    # este método permite que o controller se comunique diretamente com todos
+    # os clientes conectados. Sempre que algum usuários LOGAR ou DESLOGAR
+    # este método vai forçar esta atualização em todos os CHATS ativos. Este
+    # método é chamado sempre que a rota '/pagina' for acessada.
+    def update_users_list(self):
+        users = self.__users.getAuthenticatedUsers()
+        users_list = [{'username': user.username} for user in users.values()]
+        self.sio.emit('update_users_event', {'users': users_list})
