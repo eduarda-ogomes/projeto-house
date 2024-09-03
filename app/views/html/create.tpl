@@ -19,10 +19,10 @@
     </br>
       <div class= "button-container">
         <input value="Criar" type="submit" />
-        <form action="/portal" method="post">
-          <button type="submit">Portal</button>
-        </form>
       </div>
+    </form>
+    <form action="/portal" method="post">
+      <button type="submit">Portal</button>
     </form>
 </body>
 </html>
