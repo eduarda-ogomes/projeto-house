@@ -10,7 +10,7 @@
 </head>
 <body>
     <div class= "object_centered">
-      <h1>Seja bem-vindo ao BMVC! (Bottle Powered)</h1>
+      <h1>Seja bem-vindo ao BMVCh@t!</h1>
       <h4>Estrutura desenvolvida para oferecer suporte ao desenvolvimento FullStack da disciplina de Orientação a Objetos (Henrique Moura - 01/2024).</h4>
       <img src="{{'static/img/BottleLogo.png'}}" alt="Descrição da Imagem"
          width="300" height="300" onclick="displayText()">
