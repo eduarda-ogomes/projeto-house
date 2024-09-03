@@ -28,6 +28,9 @@
                 <form action="/portal" method="get">
                     <button type="submit">Portal</button>
                 </form>
+                <form action="/admin" method="get">
+                    <button type="submit">Administração</button>
+                </form>
             </div>
         </div>
     % else:

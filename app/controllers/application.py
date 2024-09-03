@@ -12,6 +12,7 @@ class Application:
             'pagina': self.pagina,
             'create': self.create,
             'delete': self.delete,
+            'admin': self.admin,
             'chat': self.chat,
             'edit': self.edit
         }
@@ -99,6 +100,9 @@ class Application:
             self.delete_user()
             return self.render('portal')
 
+        @self.app.route('/admin', method='GET')
+        def admin_getter():
+            return self.render('admin')
 
     # método controlador de acesso às páginas:
     def render(self, page, parameter=None):
@@ -107,7 +111,6 @@ class Application:
             return content()
         return content(parameter)
 
-
     # métodos controladores de páginas
     def getAuthenticatedUsers(self):
         return self.__users.getAuthenticatedUsers()
@@ -115,6 +118,10 @@ class Application:
     def getCurrentUserBySessionId(self):
         session_id = request.get_cookie('session_id')
         return self.__users.getCurrentUser(session_id)
+
+    def admin(self):
+        # regras
+        return template('app/views/html/admin')
 
     def create(self):
         return template('app/views/html/create')
