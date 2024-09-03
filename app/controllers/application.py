@@ -10,12 +10,16 @@ class Application:
         self.pages = {
             'portal': self.portal,
             'pagina': self.pagina,
+            'create': self.create,
+            'delete': self.delete,
             'chat': self.chat,
             'edit': self.edit
         }
         self.__users = UserRecord()
         self.__messages = MessageRecord()
-        self.edited = False
+        self.edited = None
+        self.removed = None
+        self.created= None
 
         # Initialize Bottle app
         self.app = Bottle()
@@ -49,7 +53,7 @@ class Application:
 
         @self.app.route('/')
         @self.app.route('/portal', method='GET')
-        def login():
+        def portal_getter():
             return self.render('portal')
 
         @self.app.route('/edit', method='GET')
@@ -57,22 +61,41 @@ class Application:
             return self.render('edit')
 
         @self.app.route('/portal', method='POST')
-        def portal_getter():
+        def portal_action():
             username = request.forms.get('username')
             password = request.forms.get('password')
             self.authenticate_user(username, password)
-            return self.render('portal')
 
         @self.app.route('/edit', method='POST')
-        def edit_post():
+        def edit_action():
             username = request.forms.get('username')
             password = request.forms.get('password')
             self.update_user(username, password)
             return self.render('edit')
 
+        @self.app.route('/create', method='GET')
+        def create_getter():
+            return self.render('create')
+
+        @self.app.route('/create', method='POST')
+        def create_action():
+            username = request.forms.get('username')
+            password = request.forms.get('password')
+            self.insert_user(username, password)
+            return self.render('portal')
+
         @self.app.route('/logout', method='POST')
         def logout_action():
             self.logout_user()
+            return self.render('portal')
+
+        @self.app.route('/delete', method='GET')
+        def delete_getter():
+            return self.render('delete')
+
+        @self.app.route('/delete', method='POST')
+        def delete_action():
+            self.delete_user()
             return self.render('portal')
 
 
@@ -92,6 +115,13 @@ class Application:
         session_id = request.get_cookie('session_id')
         return self.__users.getCurrentUser(session_id)
 
+    def create(self):
+        return template('app/views/html/create')
+
+    def delete(self):
+        current_user = self.getCurrentUserBySessionId()
+        return template('app/views/html/delete', user=current_user)
+
     def edit(self):
         current_user = self.getCurrentUserBySessionId()
         return template('app/views/html/edit', user=current_user)
@@ -99,11 +129,18 @@ class Application:
     def portal(self):
         current_user = self.getCurrentUserBySessionId()
         if current_user:
-            portal_render = template('app/views/html/portal', username=current_user.username, edited=self.edited)
-            self.edited = False
+            portal_render = template('app/views/html/portal', \
+            username=current_user.username, edited=self.edited, \
+            removed=self.removed, created=self.created)
+            self.edited = None
+            self.removed= None
+            self.created= None
             return portal_render
-        portal_render = template('app/views/html/portal', username=None, edited=self.edited)
-        self.edited = False
+        portal_render = template('app/views/html/portal', username=None, \
+        edited=self.edited, removed=self.removed, created=self.created)
+        self.edited = None
+        self.removed= None
+        self.created= None
         return portal_render
 
     def pagina(self):
@@ -127,9 +164,19 @@ class Application:
             redirect('/pagina')
         redirect('/portal')
 
+    def delete_user(self):
+        current_user = self.getCurrentUserBySessionId()
+        self.logout_user()
+        self.removed= self.__users.removeUser(current_user)
+        print(f'Valor de retorno de self.removed: {self.removed}')
+        redirect('/portal')
+
+    def insert_user(self, username, password):
+        self.created= self.__users.book(username, password)
+        redirect('/portal')
+
     def update_user(self, username, password):
-        self.__users.setUser(username, password)
-        self.edited = True
+        self.edited = self.__users.setUser(username, password)
         redirect('/portal')
 
     def logout_user(self):
@@ -166,7 +213,7 @@ class Application:
             self.sio.emit('connected', {'data': 'Connected'}, room=sid)
 
         @self.sio.event
-        async def disconnecupdate_users_listt(sid):
+        async def disconnect(sid):
             print(f'Client disconnected: {sid}')
 
         # recebimento de solicitação de cliente para atualização das mensagens
@@ -184,8 +231,9 @@ class Application:
     # este método permite que o controller se comunique diretamente com todos
     # os clientes conectados. Sempre que algum usuários LOGAR ou DESLOGAR
     # este método vai forçar esta atualização em todos os CHATS ativos. Este
-    # método é chamado sempre que a rota '/pagina' for acessada.
+    # método é chamado sempre que a rota ''
     def update_users_list(self):
+        print('Atualizando a lista de usuários conectados...')
         users = self.__users.getAuthenticatedUsers()
         users_list = [{'username': user.username} for user in users.values()]
         self.sio.emit('update_users_event', {'users': users_list})

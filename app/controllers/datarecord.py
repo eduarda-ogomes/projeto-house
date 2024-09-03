@@ -79,18 +79,30 @@ class UserRecord():
         for user in self.__user_accounts:
             if username == user.username:
                 user.password= password
-                print(f'O usuário {username} será editado...')
+                print(f'O usuário {username} foi editado com sucesso.')
                 self.__write()
-                return True
+                return username
         else:
             print(f'O usuário {username} não foi identificado!')
-            return False
+            return None
+
+
+    def removeUser(self,user):
+        if user in self.__user_accounts:
+            print(f'O usuário {user.username} foi encontrado no cadastro.')
+            self.__user_accounts.remove(user)
+            print(f'O usuário {user.username} foi removido do cadastro.')
+            self.__write()
+            return user.username
+        print(f'O usuário {user.username} não foi identificado!')
+        return None
 
 
     def book(self,username,password):
         new_user= UserAccount(username,password)
         self.__user_accounts.append(new_user)
         self.__write()
+        return new_user.username
 
 
     def getCurrentUser(self,session_id):

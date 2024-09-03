@@ -27,23 +27,31 @@
               <button type="submit">Logout</button>
           </form>
           <form action="/edit" method="get">
-              <button type="submit">Editar usuário</button>
+              <button type="submit">Área de usuário</button>
           </form>
           <form action="/chat" method="get">
               <button type="submit">Área de mensagens</button>
           </form>
       </div>
     % else:
-    <div class= "object_centered">
-      <form action="/portal" method="post">
-          <label for="username">Nome:</label>
-          <input id="username" name="username" type="text" required /><br>
-          <label for="password">Senha:</label>
-          <input id="password" name="password" type="password" required /><br>
-          </br>
-          <input id="setUsers" value="Login" type="submit" />
-      </form>
-    </div>
+        % if removed is not None:
+            <h4>O usuário {{ removed }} foi removido deste cadastro.</h4>
+        % elif created is not None:
+            <h4>O usuário {{ created }} foi criado neste cadastro.</h4>
+        % end
+        <div class= "object_centered">
+          <form action="/portal" method="post">
+              <label for="username">Nome:</label>
+              <input id="username" name="username" type="text" required /><br>
+              <label for="password">Senha:</label>
+              <input id="password" name="password" type="password" required /><br>
+              </br>
+              <input id="setUsers" value="Login" type="submit" />
+          </form>
+          <form action="/create" method="get">
+              <button type="submit">Criar conta de usuário</button>
+          </form>
+        </div>
     % end
 </body>
 </html>
