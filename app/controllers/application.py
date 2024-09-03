@@ -17,6 +17,7 @@ class Application:
         }
         self.__users = UserRecord()
         self.__messages = MessageRecord()
+        
         self.edited = None
         self.removed = None
         self.created= None

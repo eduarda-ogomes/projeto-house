@@ -4,7 +4,6 @@ import json
 import uuid
 
 
-
 class MessageRecord():
     """Banco de dados JSON para o recurso: Mensagem"""
 
