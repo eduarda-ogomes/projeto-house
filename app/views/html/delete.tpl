@@ -24,6 +24,14 @@
             </form>
           </div>
         </form>
+        % if user.isAdmin():
+         <h4>Como super usuário, você pode remover qualquer um dos usuários cadastrados:</h4>
+         <div id="usersDisplay">
+             % for member in accounts:
+               <li>{{member.username}}</li>
+             % end
+         </div>
+        % end
     % else:
       <h1>Página reservada!</h1>
       <h3>Realize seu LOGIN em nosso portal</h3>

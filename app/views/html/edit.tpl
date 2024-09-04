@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="static/img/favicon.ico" />
     <title>crUd de usuário</title>
+    <script src="/static/js/websocket/socket.io.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/edit.css">
     <script src="/static/js/edit.js"></script>
 </head>
@@ -32,6 +33,14 @@
               </form>
             </div>
           </form>
+        % if user.isAdmin():
+          <h4>Como super usuário, você pode editar qualquer um dos usuários cadastrados:</h4>
+         <div id="editDisplay">
+             % for member in accounts:
+               <li>{{ member.username }}</li>
+             % end
+         </div>
+        % end
     % else:
       <h1>Página reservada!</h1>
       <h3>Realize seu LOGIN em nosso portal</h3>

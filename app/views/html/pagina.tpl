@@ -12,7 +12,7 @@
     % if transfered:
         <h1>Seja bem vindo :)</h1>
         <div>
-            <h2>Dados do Usuário:</h2>
+            <h2>Dados do {{"Super" if current_user.isAdmin() else ""}} Usuário:</h2>
             <p>Username: {{current_user.username}} </p>
             <p>Password: {{current_user.password}} </p>
             <div class= "button-container">

@@ -12,7 +12,6 @@ class Application:
             'pagina': self.pagina,
             'create': self.create,
             'delete': self.delete,
-            'admin': self.admin,
             'chat': self.chat,
             'edit': self.edit
         }
@@ -100,9 +99,6 @@ class Application:
             self.delete_user()
             return self.render('portal')
 
-        @self.app.route('/admin', method='GET')
-        def admin_getter():
-            return self.render('admin')
 
     # método controlador de acesso às páginas:
     def render(self, page, parameter=None):
@@ -119,20 +115,18 @@ class Application:
         session_id = request.get_cookie('session_id')
         return self.__users.getCurrentUser(session_id)
 
-    def admin(self):
-        # regras
-        return template('app/views/html/admin')
-
     def create(self):
         return template('app/views/html/create')
 
     def delete(self):
         current_user = self.getCurrentUserBySessionId()
-        return template('app/views/html/delete', user=current_user)
+        user_accounts= self.__users.getUserAccounts()
+        return template('app/views/html/delete', user=current_user, accounts=user_accounts)
 
     def edit(self):
         current_user = self.getCurrentUserBySessionId()
-        return template('app/views/html/edit', user=current_user)
+        user_accounts= self.__users.getUserAccounts()
+        return template('app/views/html/edit', user=current_user, accounts= user_accounts)
 
     def portal(self):
         current_user = self.getCurrentUserBySessionId()
@@ -176,11 +170,13 @@ class Application:
         current_user = self.getCurrentUserBySessionId()
         self.logout_user()
         self.removed= self.__users.removeUser(current_user)
+        self.update_account_list()
         print(f'Valor de retorno de self.removed: {self.removed}')
         redirect('/portal')
 
     def insert_user(self, username, password):
-        self.created= self.__users.book(username, password)
+        self.created= self.__users.book(username, password,[])
+        self.update_account_list()
         redirect('/portal')
 
     def update_user(self, username, password):
@@ -236,6 +232,12 @@ class Application:
         def update_users_event(sid, data):
             self.sio.emit('update_users_event', {'content': data})
 
+        # solicitação para atualização da lista de usuários conectados. Quem faz
+        # esta solicitação é o próprio controlador. Ver update_users_list()
+        @self.sio.event
+        def update_account_event(sid, data):
+            self.sio.emit('update_account_event', {'content': data})
+
     # este método permite que o controller se comunique diretamente com todos
     # os clientes conectados. Sempre que algum usuários LOGAR ou DESLOGAR
     # este método vai forçar esta atualização em todos os CHATS ativos. Este
@@ -245,3 +247,12 @@ class Application:
         users = self.__users.getAuthenticatedUsers()
         users_list = [{'username': user.username} for user in users.values()]
         self.sio.emit('update_users_event', {'users': users_list})
+
+    # este método permite que o controller se comunique diretamente com todos
+    # os clientes conectados. Sempre que algum usuários se removerem
+    # este método vai comunicar todos os Administradores ativos.
+    def update_account_list(self):
+        print('Atualizando a lista de usuários cadastrados...')
+        users = self.__users.getUserAccounts()
+        users_list = [{'username': user.username} for user in users]
+        self.sio.emit('update_account_event', {'accounts': users_list})
