@@ -71,6 +71,7 @@ class Application:
         def edit_action():
             username = request.forms.get('username')
             password = request.forms.get('password')
+            print(username + ' sendo atualizado...')
             self.update_user(username, password)
             return self.render('edit')
 
