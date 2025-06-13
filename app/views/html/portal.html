@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Login</title>
+
+   <!-- Arquivo CSS -->
+   <link rel="stylesheet" href="/static/css/login.css">
+
+   <!-- Arquivo JavaScript -->
+   <script src="/static/js/login.js" defer></script>
+</head>
+<body>
+   <div class="main_login">
+      <div class="left_login">
+         <h1>Faça login <br> E se organize melhor</h1>
+         <img src="/static/img/login.svg" class="left_login_img" alt="Casa animação">
+      </div>
+      % if username:
+      <div class= "object_centered">
+        % if edited:
+            <h4>Usuário logado: {{ username }} (editado) </h4>
+        % else:
+            <h4>Usuário logado: {{ username }} </h4>
+        % end
+          <form action="/logout" method="post">
+              <button type="submit">Logout</button>
+          </form>
+          <form action="/edit" method="get">
+              <button type="submit">Área de usuário</button>
+          </form>
+          <form action="/chat" method="get">
+              <button type="submit">Área de mensagens</button>
+          </form>
+      </div>
+    % else:
+        % if removed is not None:
+            <h4>O usuário {{ removed }} foi removido deste cadastro.</h4>
+        % elif created is not None:
+            <h4>O usuário {{ created }} foi criado neste cadastro.</h4>
+        % end
+
+      <div class="rigth_login">
+        <form action="/portal" method="post">
+            <div class="card_login">
+            <h1>LOGIN</h1>
+            <div class="text_field">
+               <label for="username">Usuário</label>
+               <input type="text" name="username" placeholder="Usuario" required>
+            </div>
+            <div class="text_field">
+               <label for="password">Senha</label>
+               <input type="password" name="password" placeholder="Senha" required>
+            </div>
+            
+            <button class="btn_login">Login</button>
+            <label for="cadastro" class="text_field_cadastro">
+                Não tem uma conta? 
+                <a href="/cadastro" class="link-cadastro">Cadastre-se</a>
+            </label>
+         </div>
+        </form>
+      </div>
+    % end
+   </div>
+
+</body>
+</html>

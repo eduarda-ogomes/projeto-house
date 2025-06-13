@@ -11,7 +11,6 @@ class MessageRecord():
         self.__user_messages= []
         self.read()
 
-
     def read(self):
         try:
             with open("app/controllers/db/user_messages.json", "r") as fjson:
@@ -54,15 +53,24 @@ class UserRecord():
         self.read('user_accounts')
         self.read('super_accounts')
 
-
-    def read(self,database):
-        account_class = SuperAccount if (database == 'super_accounts' ) else UserAccount
+    def read(self, database):
+        account_class = SuperAccount if (database == 'super_accounts') else UserAccount
         try:
             with open(f"app/controllers/db/{database}.json", "r") as fjson:
                 user_d = json.load(fjson)
-                self.__allusers[database]= [account_class(**data) for data in user_d]
+                self.__allusers[database] = [
+                    account_class(
+                        fullname=data.get('fullname', 'Nome Desconhecido'),  # Valor padrão
+                        username=data.get('username', 'Usuário Desconhecido'),  # Valor padrão
+                        birthdate=data.get('birthdate', 'Data Desconhecida'),  # Valor padrão
+                        email=data.get('email', 'Email Desconhecido'),  # Valor padrão
+                        password=data.get('password', 'Senha Desconhecida'),  # Valor padrão
+                        gender=data.get('gender', 'Gênero Desconhecido'),  # Valor padrão
+                        permissions=data.get('permissions', None)  # Para SuperAccount
+                    ) for data in user_d
+                ]
         except FileNotFoundError:
-            self.__allusers[database].append(account_class('Guest', '000000'))
+            self.__allusers[database].append(account_class('Guest', '000000', '', '', '', '', ''))
 
 
     def __write(self,database):
@@ -101,10 +109,10 @@ class UserRecord():
         return None
 
 
-    def book(self, username, password, permissions):
+    def book(self, fullname, username, birthdate, email, password, confirm_password, gender, permissions):
         account_type = 'super_accounts' if permissions else 'user_accounts'
         account_class = SuperAccount if permissions else UserAccount
-        new_user = account_class(username, password, permissions) if permissions else account_class(username, password)
+        new_user = account_class(fullname, username, birthdate, email, password, gender, permissions) if permissions else account_class(fullname, username, birthdate, email, password, gender)
         self.__allusers[account_type].append(new_user)
         self.__write(account_type)
         return new_user.username

@@ -10,7 +10,7 @@ class Application:
         self.pages = {
             'portal': self.portal,
             'pagina': self.pagina,
-            'create': self.create,
+            'cadastro': self.cadastro,
             'delete': self.delete,
             'chat': self.chat,
             'edit': self.edit
@@ -42,7 +42,7 @@ class Application:
 
         @self.app.route('/favicon.ico')
         def favicon():
-            return static_file('favicon.ico', root='.app/static')
+            return static_file('favicon.ico', root='./app/static')
 
         @self.app.route('/pagina', method='GET')
         def pagina_getter():
@@ -56,16 +56,18 @@ class Application:
         @self.app.route('/portal', method='GET')
         def portal_getter():
             return self.render('portal')
+        
 
         @self.app.route('/edit', method='GET')
         def edit_getter():
             return self.render('edit')
+        
 
         @self.app.route('/portal', method='POST')
         def portal_action():
             username = request.forms.get('username')
             password = request.forms.get('password')
-            self.authenticate_user(username, password)
+            return self.authenticate_user(username, password)
 
         @self.app.route('/edit', method='POST')
         def edit_action():
@@ -75,15 +77,20 @@ class Application:
             self.update_user(username, password)
             return self.render('edit')
 
-        @self.app.route('/create', method='GET')
+        @self.app.route('/cadastro', method='GET')
         def create_getter():
-            return self.render('create')
-
-        @self.app.route('/create', method='POST')
+            return self.render('cadastro')
+        
+        @self.app.route('/cadastro', method='POST')
         def create_action():
+            fullname = request.forms.get('fullname')
             username = request.forms.get('username')
+            birthdate = request.forms.get('birthdate')
+            email = request.forms.get('email')
             password = request.forms.get('password')
-            self.insert_user(username, password)
+            confirm_password = request.forms.get('confirm_password')
+            gender = request.forms.get('gender')
+            self.insert_user(fullname,username,birthdate, email, password, confirm_password, gender)
             return self.render('portal')
 
         @self.app.route('/logout', method='POST')
@@ -99,8 +106,7 @@ class Application:
         def delete_action():
             self.delete_user()
             return self.render('portal')
-
-
+    
     # método controlador de acesso às páginas:
     def render(self, page, parameter=None):
         content = self.pages.get(page, self.portal)
@@ -116,8 +122,8 @@ class Application:
         session_id = request.get_cookie('session_id')
         return self.__users.getCurrentUser(session_id)
 
-    def create(self):
-        return template('app/views/html/create')
+    def cadastro(self):
+        return template('app/views/html/cadastro')
 
     def delete(self):
         current_user = self.getCurrentUserBySessionId()
@@ -158,14 +164,14 @@ class Application:
         if current_user:
             return username == current_user.username
         return False
-
+    
     def authenticate_user(self, username, password):
-        session_id = self.__users.checkUser(username, password)
-        if session_id:
-            self.logout_user()
-            response.set_cookie('session_id', session_id, httponly=True, secure=True, max_age=3600)
-            redirect('/pagina')
-        redirect('/portal')
+            session_id = self.__users.checkUser (username, password)
+            if session_id:
+                self.logout_user()
+                response.set_cookie('session_id', session_id, httponly=True, secure=True, max_age=3600)
+                return redirect('/pagina')  # Redireciona para a página após login
+            return redirect('/portal')  # Redireciona de volta para o portal se falhar
 
     def delete_user(self):
         current_user = self.getCurrentUserBySessionId()
@@ -175,8 +181,8 @@ class Application:
         print(f'Valor de retorno de self.removed: {self.removed}')
         redirect('/portal')
 
-    def insert_user(self, username, password):
-        self.created= self.__users.book(username, password,[])
+    def insert_user(self, fullname,username,birthdate, email, password, confirm_password, gender):
+        self.created= self.__users.book(fullname,username,birthdate, email, password, confirm_password, gender,[])
         self.update_account_list()
         redirect('/portal')
 
