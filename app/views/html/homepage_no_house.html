@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Homepage</title>
+
+   <!-- Arquivo CSS -->
+   <link rel="stylesheet" href="/static/css/menu.css">
+   <link rel="stylesheet" href="/static/css/homepage_no_house.css">
+
+   <!-- Arquivo JavaScript -->
+   <script src="/static/js/menu.js" defer></script>
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+<body>
+   <nav class="menu_lateral">
+      <div class="btn_expandir">
+         <i class="bi bi-list" id="btn_exp"></i>
+      </div>
+
+      <ul>
+         <li class="item_menu ativo">
+            <a href="#">
+               <span class="icon"><i class="bi bi-house-door"></i></span>
+               <span class="text_link">Home</span>
+            </a>
+         </li>
+         <li class="item_menu">
+            <a href="#">
+               <span class="icon"><i class="bi bi-columns-gap"></i></span>
+               <span class="text_link">Dashborad</span>
+            </a>
+         </li>
+         <li class="item_menu">
+            <a href="#">
+               <span class="icon"><i class="bi bi-gear"></i></span>
+               <span class="text_link">Configurações</span>
+            </a>
+         </li>
+         <li class="item_menu">
+            <a href="#">
+               <span class="icon"><i class="bi bi-person"></i></span>
+               <span class="text_link">Perfil</span>
+            </a>
+         </li>
+         <li class="item_menu">
+            <a href="#">
+               <span class="icon"></span>
+               <span class="text_link"></span>
+            </a>
+         </li>
+      </ul>
+   </nav>
+
+   <nav class="homepage">
+        <div class="container">
+            <h1>Bem-vindo, {{ user.fullname }}!</h1>
+            
+            <p>Escolha uma opção para continuar:</p>
+            <section class="option criar-casa">
+               <form action="/create_house" method="POST">
+                  <button type="submit">Criar uma nova casa</button>
+               </form>
+            </section>
+
+            <section class="option entrar-casa" style="margin-top: 20px;">
+               <form action="/join_house" method="POST">
+                  <label for="house_name_join">Digite o nome da casa para entrar:</label><br />
+                  <input type="text" id="house_name_join" name="house_name" placeholder="Nome da casa" required style="padding: 8px; width: 250px;" />
+                  <br /><br />
+                  <button type="submit">Entrar na casa</button>
+               </form>
+            </section>
+
+            <section style="margin-top: 40px;">
+               <form action="/logout" method="POST">
+                  <button type="submit" class="logout-btn">
+                     Sair
+                  </button>
+               </form>
+            </section>
+         </div>
+        </div>
+   </nav>
+</body>
+</html>

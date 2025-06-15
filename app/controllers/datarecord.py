@@ -1,5 +1,6 @@
 from app.models.user_account import UserAccount, SuperAccount
 from app.models.user_message import UserMessage
+from app.models.house import House
 import json
 import uuid
 
@@ -146,3 +147,66 @@ class UserRecord():
     def logout(self, session_id):
         if session_id in self.__authenticated_users:
             del self.__authenticated_users[session_id] # Remove o usuário logado
+
+
+class HouseRecord:
+    """Gerencia as casas (ambientes) e suas associações com usuários"""
+
+    def __init__(self):
+        self.houses = {}
+        self.load()
+
+    def load(self):
+        try:
+            with open('app/controllers/db/houses.json', 'r') as f:
+                houses_data = json.load(f)
+                self.houses = {
+                    house_id: House(
+                        house_id=house_id,
+                        name=house['name'],
+                        members=house.get('members', [])
+                    )
+                    for house_id, house in houses_data.items()  # Corrigido para usar house_id e house
+                }
+        except (FileNotFoundError, json.JSONDecodeError):
+            self.houses = {}
+
+    def save(self):
+        with open('app/controllers/db/houses.json', 'w') as f:
+            houses_data = {
+                house_id: {
+                    'name': house.name,
+                    'members': house.members
+                }
+                for house_id, house in self.houses.items()  # Corrigido para usar house_id e house
+            }
+            json.dump(houses_data, f, indent=4)
+
+    def create_house(self, name, owner_username):
+        house_id = str(uuid.uuid4())
+        new_house = House(house_id=house_id, name=name, members=[owner_username])
+        self.houses[house_id] = new_house
+        self.save()
+        return house_id
+
+    def add_user_to_house(self, house_id, username):
+        if house_id in self.houses:
+            house = self.houses[house_id]
+            if username not in house.members:
+                house.add_member(username)
+                self.save()
+                return True
+        return False
+
+    def get_house_by_user(self, username):
+        for house_id, house in self.houses.items():
+            if username in house.members:
+                return {'id': house_id, 'name': house.name, 'members': house.members}
+        return None
+
+    def house_exists(self, house_id):
+        return house_id in self.houses
+
+    def list_houses(self):
+        """Retorna lista de casas com id e nome, para escolha do usuário"""
+        return [{'id': house_id, 'name': house.name} for house_id, house in self.houses.items()]

@@ -1,4 +1,4 @@
-from app.controllers.datarecord import UserRecord, MessageRecord
+from app.controllers.datarecord import UserRecord, MessageRecord,HouseRecord
 from bottle import template, redirect, request, response, Bottle, static_file
 import socketio
 
@@ -11,12 +11,14 @@ class Application:
             'portal': self.portal,
             'pagina': self.pagina,
             'cadastro': self.cadastro,
+            'homepage': self.homepage,
             'delete': self.delete,
             'chat': self.chat,
             'edit': self.edit
         }
         self.__users = UserRecord()
         self.__messages = MessageRecord()
+        self.__houses = HouseRecord()
 
         self.edited = None
         self.removed = None
@@ -92,6 +94,46 @@ class Application:
             gender = request.forms.get('gender')
             self.insert_user(fullname,username,birthdate, email, password, confirm_password, gender)
             return self.render('portal')
+        
+
+        @self.app.route('/homepage', method='GET')
+        def homepage_getter():
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user:
+                return redirect('/portal')  # Usuário não autenticado
+            casa = self.__houses.get_house_by_user(current_user.username)
+            if casa:
+                # Usuário está em uma casa, renderiza informações da casa
+                return template('app/views/html/homepage_in_house', user=current_user, casa=casa)
+            else:
+                # Usuário não está em casa, renderiza opções criar / entrar em casa
+                houses_list = self.__houses.list_houses()
+                return template('app/views/html/homepage_no_house', user=current_user, houses=houses_list)
+            
+        @self.app.route('/create_house', method='POST')
+        def create_house(self):
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user:
+                return redirect('/portal')
+            house_name = request.forms.get('house_name')
+            if house_name:
+                house_id = self.__houses.create_house(house_name, current_user.username)
+                # Opcional: atualizar estado do usuário para associar house_id (pode ser com banco)
+                return redirect('/homepage')
+            return redirect('/homepage')
+        # Rota para entrar numa casa existente
+
+        @self.app.route('/join_house', method='POST')
+        def join_house(self):
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user:
+                return redirect('/portal')
+            house_id = request.forms.get('house_id')
+            if house_id and self.__houses.house_exists(house_id):
+                self.__houses.add_user_to_house(house_id, current_user.username)
+                # Opcional: persistir que usuário entrou na casa
+                return redirect('/homepage')
+            return redirect('/homepage')
 
         @self.app.route('/logout', method='POST')
         def logout_action():
@@ -159,6 +201,12 @@ class Application:
             return template('app/views/html/pagina', transfered=True, current_user=current_user)
         return template('app/views/html/pagina', transfered=False)
 
+    def homepage(self):
+        current_user = self.getCurrentUserBySessionId()
+        if current_user:
+            return(template('app/views/html/homepage', user=current_user))
+        return redirect('/portal')
+
     def is_authenticated(self, username):
         current_user = self.getCurrentUserBySessionId()
         if current_user:
@@ -170,7 +218,7 @@ class Application:
             if session_id:
                 self.logout_user()
                 response.set_cookie('session_id', session_id, httponly=True, secure=True, max_age=3600)
-                return redirect('/pagina')  # Redireciona para a página após login
+                return redirect('/homepage')  # Redireciona para a página após login
             return redirect('/portal')  # Redireciona de volta para o portal se falhar
 
     def delete_user(self):
@@ -179,12 +227,12 @@ class Application:
         self.removed= self.__users.removeUser(current_user)
         self.update_account_list()
         print(f'Valor de retorno de self.removed: {self.removed}')
-        redirect('/portal')
+        return redirect('/portal')
 
     def insert_user(self, fullname,username,birthdate, email, password, confirm_password, gender):
         self.created= self.__users.book(fullname,username,birthdate, email, password, confirm_password, gender,[])
         self.update_account_list()
-        redirect('/portal')
+        return redirect('/portal')
 
     def update_user(self, username, password):
         self.edited = self.__users.setUser(username, password)

@@ -1,0 +1,80 @@
+main.homepage {
+    margin-left: 75px; /* Espaço para o menu lateral */
+    padding: 20px; /* Adicionando um pouco de padding */
+    flex-grow: 1; /* Faz o conteúdo ocupar o espaço restante */
+    background-color: #f4f4f4; /* Cor de fundo opcional */
+}
+
+.container {
+    max-width: 700px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #4CAF50;
+    margin-bottom: 1rem;
+}
+
+.option {
+    margin-top: 20px;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    margin: 12px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    background-color: #7c3aed;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+button:hover, a.button:hover {
+    background-color: #5a27a8;
+}
+
+a.button {
+    display: block;
+}
+
+@media (max-width: 768px) {
+  /* Muda o container para quase largura total e reduz margens */
+  main.homepage .container {
+    max-width: 95%;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 8px;   /* Bordas um pouco menores */
+  }
+
+  /* Reduz tamanho da fonte do título */
+  main.homepage h1 {
+    font-size: 2rem;
+  }
+
+  /* Ajusta tamanho do texto e botões */
+  main.homepage p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+
+  main.homepage button {
+    font-size: 1rem;
+    padding: 14px;
+  }
+
+  main.homepage input[type="text"] {
+    max-width: 100%;    /* Ocupa toda a largura disponível */
+    font-size: 1rem;
+  }
+}
