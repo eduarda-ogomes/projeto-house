@@ -111,7 +111,7 @@ class Application:
                 return template('app/views/html/homepage_no_house', user=current_user, houses=houses_list)
             
         @self.app.route('/create_house', method='POST')
-        def create_house(self):
+        def create_house():
             current_user = self.getCurrentUserBySessionId()
             if not current_user:
                 return redirect('/portal')

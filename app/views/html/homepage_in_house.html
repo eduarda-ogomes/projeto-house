@@ -56,33 +56,14 @@
    <nav class="homepage">
         <div class="container">
             <h1>Bem-vindo, {{ user.fullname }}!</h1>
-            
-            <p>Escolha uma opção para continuar:</p>
-            <section class="option criar-casa">
-               <form action="/create_house" method="POST">
-                  <label for="house_name">Nome da casa:</label>
-                  <input type="text" name="house_name" id="house_name">
-                  <button type="submit">Criar uma nova casa</button>
-               </form>
-            </section>
-
-            <section class="option entrar-casa" style="margin-top: 20px;">
-               <form action="/join_house" method="POST">
-                  <label for="house_name_join">Digite o nome da casa para entrar:</label><br />
-                  <input type="text" id="house_name_join" name="house_name" placeholder="Nome da casa" required style="padding: 8px; width: 250px;" />
-                  <br /><br />
-                  <button type="submit">Entrar na casa</button>
-               </form>
-            </section>
-
-            <section style="margin-top: 40px;">
+         </div>
+         <section style="margin-top: 40px;">
                <form action="/logout" method="POST">
                   <button type="submit" class="logout-btn">
                      Sair
                   </button>
                </form>
             </section>
-         </div>
         </div>
    </nav>
 </body>
