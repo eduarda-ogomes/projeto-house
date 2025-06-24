@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+.homepage {
+    height: 100vh;
+    background-color: #201b2c;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.homepage .container {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+}
+
+.homepage .tarefas, .homepage .moradores {
+    width: 45%;
+}
+
+.homepage .moradores h2, .homepage .tarefas h2 {
+    color: #f0ffffde;
+}
+
+.homepage .moradores ul, .homepage .tarefas ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.homepage .adicionar-usuario {
+    margin-top: 20px;
+}
+
+.homepage .btn-default {
+    background-color: #00ff88;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #2b134b;
+    cursor: pointer;
+    box-shadow: 0px 10px 40px #00000056;
+    transition: background-color 0.3s ease;
+}
+
+.homepage .btn-default:hover {
+    background-color: #06cc41;
+}
+
+

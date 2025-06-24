@@ -8,10 +8,10 @@
    <!-- Arquivo CSS -->
    <link rel="stylesheet" href="/static/css/menu.css">
    <link rel="stylesheet" href="/static/css/homepage_no_house.css">
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
    <!-- Arquivo JavaScript -->
    <script src="/static/js/menu.js" defer></script>
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 <body>
    <nav class="menu_lateral">
@@ -29,7 +29,7 @@
          <li class="item_menu">
             <a href="#">
                <span class="icon"><i class="bi bi-columns-gap"></i></span>
-               <span class="text_link">Dashborad</span>
+               <span class="text_link">Dashboard</span>
             </a>
          </li>
          <li class="item_menu">
@@ -44,27 +44,57 @@
                <span class="text_link">Perfil</span>
             </a>
          </li>
-         <li class="item_menu">
-            <a href="#">
-               <span class="icon"></span>
-               <span class="text_link"></span>
-            </a>
-         </li>
       </ul>
    </nav>
 
    <nav class="homepage">
-        <div class="container">
-            <h1>Bem-vindo, {{ user.fullname }}!</h1>
-         </div>
+      <div class="container">
+         <h1>Bem-vindo, {{ user.fullname }} a sua casa!</h1>
          <section style="margin-top: 40px;">
-               <form action="/logout" method="POST">
-                  <button type="submit" class="logout-btn">
-                     Sair
-                  </button>
+            <form action="/logout" method="POST">
+               <button type="submit" class="logout-btn">Sair</button>
+            </form>
+         </section>
+      </div>
+
+      <div class="container">
+         <div class="tarefas">
+            <h2>Tarefas do Morador</h2>
+            <ul>
+               <li>
+                  <input type="checkbox" id="tarefa1">
+                  <label for="tarefa1">Tarefa 1</label>
+               </li>
+               <li>
+                  <input type="checkbox" id="tarefa2">
+                  <label for="tarefa2">Tarefa 2</label>
+               </li>
+            </ul>
+
+            <h3>Todas as Tarefas da Casa</h3>
+            <ul>
+               <li>Tarefa A - Atribuída a Morador 1 - Concluída</li>
+               <li>Tarefa B - Atribuída a Morador 2 - Não Concluída</li>
+            </ul>
+         </div>
+
+         <div class="moradores">
+            <h2>Moradores da Casa</h2>
+            <ul>
+               <li>Morador 1</li>
+               <li>Morador 2</li>
+               <li>Morador 3</li>
+            </ul>
+            <div class="adicionar-usuario">
+               <h3>Adicionar Usuário</h3>
+               <form action="/add_member" method="POST">
+                  <input type="text" name="username" placeholder="Nome do Usuário" required>
+                  <button type="submit" class="btn-default">Adicionar Morador</button>
                </form>
-            </section>
-        </div>
+            </div>
+
+         </div>
+      </div>
    </nav>
 </body>
 </html>

@@ -134,6 +134,25 @@ class Application:
                 # Opcional: persistir que usuário entrou na casa
                 return redirect('/homepage')
             return redirect('/homepage')
+        
+        @self.app.route('/add_member', method='POST')
+        def add_member():
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user:
+                return redirect('/portal')  # Usuário não autenticado
+            new_member_username = request.forms.get('username')  # Nome de usuário do novo morador
+
+            # Obtém a casa do morador atual
+            house = self.__houses.get_house_by_user(current_user.username)
+            if house:  # Verifica se a casa foi encontrada
+                house.add_member(new_member_username)  # Adiciona o novo morador
+                self.__houses.save()
+                # Opcional: Persistir a mudança no banco de dados, se necessário
+                return redirect('/homepage')  # Redireciona para a homepage após adicionar
+
+            return redirect('/homepage')  # Redireciona se o usuário não for membro da casa
+
+
 
         @self.app.route('/logout', method='POST')
         def logout_action():

@@ -201,8 +201,9 @@ class HouseRecord:
     def get_house_by_user(self, username):
         for house_id, house in self.houses.items():
             if username in house.members:
-                return {'id': house_id, 'name': house.name, 'members': house.members}
+                return house  # Retorna o objeto House
         return None
+
 
     def house_exists(self, house_id):
         return house_id in self.houses
