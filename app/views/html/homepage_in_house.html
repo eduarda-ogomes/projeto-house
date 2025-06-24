@@ -91,7 +91,35 @@
                   <input type="text" name="username" placeholder="Nome do Usuário" required>
                   <button type="submit" class="btn-default">Adicionar Morador</button>
                </form>
-            </div>
+            </div> 
+            
+            <div class="chore-form-container">
+               <h3><i class="fas fa-tasks"></i> Adicionar Nova Tarefa</h3>
+               
+               <form action="/add_chore" method="POST" class="chore-form">
+                   <div class="form-group">
+                       <label for="activity">Descrição da Tarefa:</label>
+                       <input type="text" id="activity" name="activity" required 
+                              placeholder="Ex: Limpar a cozinha">
+                   </div>
+                   
+                   <div class="form-row">
+                       <div class="form-group">
+                           <label for="date">Data:</label>
+                           <input type="date" id="date" name="date" required>
+                       </div>
+                       
+                      
+                   </div>
+                   
+                   <button type="submit" class="btn-submit">
+                       <i class="fas fa-plus-circle"></i> Adicionar Tarefa
+                   </button>
+               </form>
+           </div>
+           
+           
+            
 
          </div>
       </div>

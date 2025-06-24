@@ -1,4 +1,4 @@
-from app.controllers.datarecord import UserRecord, MessageRecord,HouseRecord
+from app.controllers.datarecord import UserRecord, MessageRecord,HouseRecord, ChoreRecord
 from bottle import template, redirect, request, response, Bottle, static_file
 import socketio
 
@@ -19,6 +19,7 @@ class Application:
         self.__users = UserRecord()
         self.__messages = MessageRecord()
         self.__houses = HouseRecord()
+        self.__chores = ChoreRecord()
 
         self.edited = None
         self.removed = None
@@ -96,19 +97,24 @@ class Application:
             return self.render('portal')
         
 
+
+
         @self.app.route('/homepage', method='GET')
         def homepage_getter():
             current_user = self.getCurrentUserBySessionId()
             if not current_user:
-                return redirect('/portal')  # Usuário não autenticado
-            casa = self.__houses.get_house_by_user(current_user.username)
-            if casa:
-                # Usuário está em uma casa, renderiza informações da casa
-                return template('app/views/html/homepage_in_house', user=current_user, casa=casa)
+                return redirect('/portal')  # User not authenticated
+
+            house = self.__houses.get_house_by_user(current_user.username)
+            if house:
+                # User is in a house, render house information
+                return template('app/views/html/homepage_in_house', user=current_user, house=house)
             else:
-                # Usuário não está em casa, renderiza opções criar / entrar em casa
+                # User is not in a house, render options to create/join a house
                 houses_list = self.__houses.list_houses()
                 return template('app/views/html/homepage_no_house', user=current_user, houses=houses_list)
+            
+
             
         @self.app.route('/create_house', method='POST')
         def create_house():
@@ -149,9 +155,29 @@ class Application:
                 self.__houses.save()
                 # Opcional: Persistir a mudança no banco de dados, se necessário
                 return redirect('/homepage')  # Redireciona para a homepage após adicionar
-
             return redirect('/homepage')  # Redireciona se o usuário não for membro da casa
+        
+        @self.app.route('/add_chore', method='POST')
+        def add_chore():
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user:
+                return redirect('/portal')
 
+            activity = request.forms.get('activity')
+            date = request.forms.get('date')
+
+            if not all([activity, date]):
+                return redirect('/homepage')  # Add error handling if needed
+
+
+            self.__chores.create_chore(
+                activity=activity,
+                date=date,
+            )
+            return redirect('/homepage')
+
+
+            
 
 
         @self.app.route('/logout', method='POST')

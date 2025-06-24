@@ -1,4 +1,5 @@
 from app.models.user_account import UserAccount, SuperAccount
+from app.models.chore import Chore
 from app.models.user_message import UserMessage
 from app.models.house import House
 import json
@@ -211,3 +212,63 @@ class HouseRecord:
     def list_houses(self):
         """Retorna lista de casas com id e nome, para escolha do usuário"""
         return [{'id': house_id, 'name': house.name} for house_id, house in self.houses.items()]
+# First, let's update the ChoreRecord class to match your model
+class ChoreRecord:
+    """Manages chores and their associations with houses and users"""
+
+    def __init__(self):
+        self.chores = {}
+        self.load()
+
+    def load(self):
+        try:
+            with open('app/controllers/db/chores.json', 'r') as f:
+                chores_data = json.load(f)
+                self.chores = {
+                    chore_id: Chore(
+                        activity=chore['activity'],
+                        date=chore['date'],
+                        status=chore['status'],
+                        responsable=UserAccount(
+                            username=chore['responsable'],
+                            # Add other required UserAccount fields if needed
+                        )
+                    )
+                    for chore_id, chore in chores_data.items()
+                }
+        except (FileNotFoundError, json.JSONDecodeError):
+            self.chores = {}
+
+    def save(self):
+        with open('app/controllers/db/chores.json', 'w') as f:
+            chores_data = {
+                chore_id: {
+                    'activity': chore.activity,
+                    'date': chore.date,
+                    'status': chore.status,
+                }
+                for chore_id, chore in self.chores.items()
+            }
+            json.dump(chores_data, f, indent=4)
+
+    def create_chore(self, activity, date, status='pending'):
+        chore_id = str(uuid.uuid4())
+        new_chore = Chore(
+            activity=activity,
+            date=date,
+            status=status,
+        )
+        self.chores[chore_id] = new_chore
+        self.save()
+        return chore_id
+
+    def get_chores_by_house(self, house_id):
+        # If you want to track chores per house, add house_id to Chore model
+        return [chore for chore in self.chores.values()]
+
+    def get_chores_by_user(self, username):
+        return [
+            {'id': cid, 'activity': chore.activity, 'date': chore.date, 'status': chore.status}
+            for cid, chore in self.chores.items() 
+            if chore.responsable == username
+        ]
