@@ -1,8 +1,12 @@
-from app.controllers.datarecord import UserRecord, MessageRecord,HouseRecord, ChoreRecord
-from bottle import template, redirect, request, response, Bottle, static_file
+# application.py
+from app.controllers.datarecord import UserRecord, MessageRecord, HouseRecord # Removido ChoreRecord aqui
+from bottle import template, redirect, request, response, Bottle, static_file, HTTPError, post
 import socketio
 import datetime
-
+from datetime import date, timedelta
+import time
+import hashlib
+from threading import Timer
 
 class Application:
 
@@ -20,7 +24,7 @@ class Application:
         self.__users = UserRecord()
         self.__messages = MessageRecord()
         self.__houses = HouseRecord()
-        self.__chores = ChoreRecord()
+        # self.__chores = ChoreRecord() # Comentado, pois não é usado para as tarefas da House
 
         self.edited = None
         self.removed = None
@@ -101,32 +105,70 @@ class Application:
         def homepage_getter():
             current_user = self.getCurrentUserBySessionId()
             if not current_user:
-                return redirect('/portal')  # Usuário não autenticado
+                return redirect('/portal')
 
             house = self.__houses.get_house_by_user(current_user.username)
             if house:
-                # --- LÓGICA DE FILTRAGEM AQUI ---
+                members = house.members
+                if not isinstance(members, list):
+                    members = []
+                    print(f"AVISO: house.members não é uma lista para casa {house.id}. Resetando para lista vazia.")
+
+                for chore in house.chores:
+                    rotation_days = chore.get('rotation_days')
+                    next_due_str = chore.get('next_due')
+                    last_completed_date_str = chore.get('last_completed_date')
+
+                    if (rotation_days is not None and rotation_days > 0 and
+                        next_due_str and
+                        last_completed_date_str): # A rotação só deve acontecer se a tarefa foi completada
+                        
+                        try:
+                            next_due_date = datetime.datetime.strptime(next_due_str, '%Y-%m-%d').date()
+                            today = date.today()
+
+                            if next_due_date <= today:
+                                current_assignee = chore.get('assigned_to')
+                                if current_assignee in members:
+                                    current_index = members.index(current_assignee)
+                                    next_index = (current_index + 1) % len(members)
+                                    next_assignee = members[next_index]
+                                else:
+                                    # Se o atribuído atual não está mais na casa, atribui ao primeiro membro
+                                    next_assignee = members[0] if members else None
+
+                                if next_assignee:
+                                    chore['assigned_to'] = next_assignee
+                                    chore['next_due'] = (next_due_date + timedelta(days=rotation_days)).strftime('%Y-%m-%d')
+                                    
+                                    # Limpa o status de conclusão para a nova rotação
+                                    chore['last_completed_date'] = None
+                                    chore['last_completed_by'] = None
+                                    
+                                    self.__houses.save() # Salva a rotação
+                                else:
+                                    print(f"AVISO: Tarefa '{chore.get('activity', 'N/A')}' não rotacionada, sem próximos membros.")
+                            
+                        except (ValueError, KeyError) as e:
+                            print(f"Erro ao processar rotação da tarefa '{chore.get('activity', 'N/A')}': {e}")
+
                 my_chores = []
                 other_chores = []
                 for chore in house.chores:
-                    # Usar .get() aqui também para garantir que não haja KeyError se o JSON estiver antigo
                     if chore.get('assigned_to') == current_user.username:
                         my_chores.append(chore)
                     else:
                         other_chores.append(chore)
-                # --- FIM DA LÓGICA DE FILTRAGEM ---
 
-                # Passa as listas filtradas para o template
                 return template(
                     'app/views/html/homepage_in_house',
                     user=current_user,
                     house=house,
-                    my_chores=my_chores,      # NOVA VARIÁVEL
-                    other_chores=other_chores, # NOVA VARIÁVEL
-                    datetime=datetime          # Mantenha o datetime
+                    my_chores=my_chores,
+                    other_chores=other_chores,
+                    datetime=datetime # Passando datetime para o template
                 )
             else:
-                # ... (sua lógica para usuário sem casa)
                 houses_list = self.__houses.list_houses()
                 return template('app/views/html/homepage_no_house', user=current_user, houses=houses_list)
 
@@ -139,20 +181,20 @@ class Application:
             house_name = request.forms.get('house_name')
             if house_name:
                 house_id = self.__houses.create_house(house_name, current_user.username)
-                # Opcional: atualizar estado do usuário para associar house_id (pode ser com banco)
                 return redirect('/homepage')
             return redirect('/homepage')
-        # Rota para entrar numa casa existente
-
+        
         @self.app.route('/join_house', method='POST')
-        def join_house(self):
+        def join_house():
             current_user = self.getCurrentUserBySessionId()
             if not current_user:
                 return redirect('/portal')
             house_id = request.forms.get('house_id')
             if house_id and self.__houses.house_exists(house_id):
-                self.__houses.add_user_to_house(house_id, current_user.username)
-                # Opcional: persistir que usuário entrou na casa
+                house = self.__houses.houses.get(house_id)
+                if house:
+                    house.add_member(current_user.username)
+                    self.__houses.save()
                 return redirect('/homepage')
             return redirect('/homepage')
         
@@ -160,65 +202,150 @@ class Application:
         def add_member():
             current_user = self.getCurrentUserBySessionId()
             if not current_user:
-                return redirect('/portal')  # Usuário não autenticado
-            new_member_username = request.forms.get('username')  # Nome de usuário do novo morador
+                return redirect('/portal')
+            new_member_username = request.forms.get('username').strip()
 
-            # Obtém a casa do morador atual
             house = self.__houses.get_house_by_user(current_user.username)
-            if house:  # Verifica se a casa foi encontrada
-                house.add_member(new_member_username)  # Adiciona o novo morador
+            if house:
+                if new_member_username in house.members:
+                    print(f"Tentativa de adicionar membro duplicado: '{new_member_username}' na casa {house.id}")
+                    return redirect('/homepage')
+                
+                if not self.__users.user_exists(new_member_username):
+                    print(f"AVISO: Usuário '{new_member_username}' não existe no sistema.")
+                    return HTTPError(400, f"Usuário '{new_member_username}' não encontrado no sistema.")
+
+                house.add_member(new_member_username)
                 self.__houses.save()
-                # Opcional: Persistir a mudança no banco de dados, se necessário
-                return redirect('/homepage')  # Redireciona para a homepage após adicionar
-            return redirect('/homepage')  # Redireciona se o usuário não for membro da casa
+                return redirect('/homepage')
+            return redirect('/homepage')
         
         @self.app.post('/add_chore')
-        def add_chore_post():
+        def add_chore():
             current_user = self.getCurrentUserBySessionId()
             if not current_user:
                 return redirect('/portal')
 
+            activity = request.forms.get('activity').strip()
+            date_str = request.forms.get('date')
+            rotation_days = request.forms.get('rotation_days')
+
+            if not activity or not date_str:
+                return HTTPError(400, "Atividade e data são campos obrigatórios.")
+
+            try:
+                rotation_days = int(rotation_days) if rotation_days else 0
+            except ValueError:
+                return HTTPError(400, "Dias de rotatividade inválidos.")
+
             house = self.__houses.get_house_by_user(current_user.username)
             if not house:
-                return "Erro: Usuário não pertence a uma casa." # Ou redirecionar
+                return HTTPError(404, "Casa não encontrada para adicionar tarefa.")
 
-            activity = request.forms.get('activity')
-            date_str = request.forms.get('date')
-            rotation_days_str = request.forms.get('rotation_days')
+            # Não há mais verificação de duplicidade da tarefa aqui
 
-            rotation_days = None
-            if rotation_days_str:
-                try:
-                    rotation_days = int(rotation_days_str)
-                    if rotation_days < 0:
-                        rotation_days = 0 # Garante que não seja negativo
-                except ValueError:
-                    rotation_days = 0 # Se não for um número válido, sem rotação
+            house.add_chore(
+                activity=activity,
+                date=date_str,
+                assigned_to=current_user.username,
+                rotation_days=rotation_days,
+                next_due=date_str
+            )
+            self.__houses.save()
 
-            if activity and date_str:
-                if self.__houses.add_chore_to_house(house.id, activity, date_str, rotation_days):
-                    return redirect('/homepage')
-            return "Erro ao adicionar tarefa." # Melhorar mensagem de erro
+            return redirect('/homepage')
+            
 
-        # NOVA ROTA para completar tarefa
         @self.app.post('/complete_chore/<house_id>')
         def complete_chore_post(house_id):
             current_user = self.getCurrentUserBySessionId()
             if not current_user:
                 return redirect('/portal')
 
-            # Validação adicional: verificar se o current_user realmente pertence à house_id
+            house_id_str = str(house_id)
             house = self.__houses.get_house_by_user(current_user.username)
-            if not house or house.id != house_id:
-                return "Acesso negado ou casa inválida."
+            
+            if not house or house.id != house_id_str:
+                return HTTPError(403, "Acesso negado ou casa inválida.")
 
-            activity = request.forms.get('activity')
-            current_date_str = request.forms.get('current_date', datetime.date.today().strftime('%Y-%m-%d')) # Pega a data de hoje como fallback
+            activity_to_complete = request.forms.get('activity')
+            
+            if house.complete_chore(activity_to_complete, current_user.username):
+                self.__houses.save()
+            else:
+                return HTTPError(404, "Tarefa não encontrada ou não atribuída a você.")
+            
+            return redirect('/homepage')
 
-            if activity:
-                if self.__houses.complete_house_chore(house_id, activity, current_date_str):
-                    return redirect('/homepage')
-            return "Erro ao completar tarefa."
+        @self.app.post('/remove_chore/<house_id>')
+        def remove_chore(house_id):
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user:
+                return redirect('/portal')
+
+            house_id_str = str(house_id)
+            activity_to_remove = request.forms.get('activity')
+
+            if not activity_to_remove:
+                return HTTPError(400, "Atividade para remover não fornecida.")
+
+            house = self.__houses.get_house_by_user(current_user.username)
+            if not house or house.id != house_id_str:
+                return HTTPError(403, "Acesso negado ou casa inválida.")
+
+            initial_chore_count = len(house.chores)
+            house.chores = [
+                chore for chore in house.chores
+                if chore['activity'] != activity_to_remove
+            ]
+            
+            if len(house.chores) == initial_chore_count:
+                return HTTPError(404, "Tarefa não encontrada para remover.")
+
+            self.__houses.save()
+            return redirect('/homepage')
+
+        @self.app.post('/remove_member/<house_id>')
+        def remove_member(house_id):
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user:
+                return redirect('/portal')
+
+            house_id_str = str(house_id)
+            member_to_remove = request.forms.get('username')
+
+            if not member_to_remove:
+                return HTTPError(400, "Usuário para remover não fornecido.")
+            
+            house = self.__houses.get_house_by_user(current_user.username)
+            if not house or house.id != house_id_str:
+                return HTTPError(403, "Acesso negado ou casa inválida.")
+
+            if member_to_remove == current_user.username:
+                return HTTPError(403, "Você não pode se remover da casa por aqui.")
+
+            if len(house.members) == 1 and house.members[0] == member_to_remove:
+                 return HTTPError(403, "Não é possível remover o único membro da casa.")
+
+
+            initial_member_count = len(house.members)
+            house.members = [
+                member for member in house.members
+                if member != member_to_remove
+            ]
+            
+            if len(house.members) == initial_member_count:
+                return HTTPError(404, "Membro não encontrado ou não pode ser removido.")
+            
+            for chore in house.chores:
+                if chore.get('assigned_to') == member_to_remove:
+                    chore['assigned_to'] = current_user.username if current_user.username in house.members else (house.members[0] if house.members else None)
+                    if chore.get('last_completed_by') == member_to_remove:
+                        chore['last_completed_by'] = None
+                        chore['last_completed_date'] = None
+
+            self.__houses.save()
+            return redirect('/homepage')
 
 
         @self.app.route('/logout', method='POST')
@@ -304,8 +431,8 @@ class Application:
             if session_id:
                 self.logout_user()
                 response.set_cookie('session_id', session_id, httponly=True, secure=True, max_age=3600)
-                return redirect('/homepage')  # Redireciona para a página após login
-            return redirect('/portal')  # Redireciona de volta para o portal se falhar
+                return redirect('/homepage')
+            return redirect('/portal')
 
     def delete_user(self):
         current_user = self.getCurrentUserBySessionId()
@@ -374,15 +501,12 @@ class Application:
             self.sio.emit('update_users_event', {'content': data})
 
         # solicitação para atualização da lista de usuários conectados. Quem faz
-        # esta solicitação é o próprio controlador. Ver update_users_list()
+        # esta solicitação é o próprio controlador. Ver update_account_event()
         @self.sio.event
         def update_account_event(sid, data):
             self.sio.emit('update_account_event', {'content': data})
 
-    # este método permite que o controller se comunique diretamente com todos
-    # os clientes conectados. Sempre que algum usuários LOGAR ou DESLOGAR
-    # este método vai forçar esta atualização em todos os CHATS ativos. Este
-    # método é chamado sempre que a rota ''
+
     def update_users_list(self):
         print('Atualizando a lista de usuários conectados...')
         users = self.__users.getAuthenticatedUsers()

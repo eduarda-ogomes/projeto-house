@@ -166,10 +166,10 @@ class HouseRecord:
                         house_id=house_id,
                         name=house['name'],
                         members=house.get('members', []),
-                        chores=house.get('chores', []),
+                        chores=house.get('chores', []), # Carrega dicionários diretamente
                         last_member=house.get('last_member',0)
                     )
-                    for house_id, house in houses_data.items()  # Corrigido para usar house_id e house
+                    for house_id, house in houses_data.items()
                 }
         except (FileNotFoundError, json.JSONDecodeError):
             self.houses = {}
@@ -180,10 +180,10 @@ class HouseRecord:
                 house_id: {
                     'name': house.name,
                     'members': house.members,
-                    'chores': house.chores,
+                    'chores': house.chores, # Salva dicionários diretamente
                     'last_member': house.last_member
                 }
-                for house_id, house in self.houses.items()  # Corrigido para usar house_id e house
+                for house_id, house in self.houses.items()
             }
             json.dump(houses_data, f, indent=4)
 
@@ -195,18 +195,10 @@ class HouseRecord:
         self.save()
         return house_id
     
-    def add_chore_to_house(self, house_id, activity, date,rotation_days=None): # Adicionado 'activity', 'date'
-        if house_id in self.houses:
-            house = self.houses[house_id]
-            house.add_chore(activity, date, rotation_days) # Passando ambos os parâmetros
-            self.save()
-            return True
-        return False
-
     def get_house_by_user(self, username):
         for house_id, house in self.houses.items():
             if username in house.members:
-                return house  # Retorna o objeto House
+                return house
         return None
 
 
@@ -216,31 +208,19 @@ class HouseRecord:
     def list_houses(self):
         """Retorna lista de casas com id e nome, para escolha do usuário"""
         return [{'id': house_id, 'name': house.name} for house_id, house in self.houses.items()]
-
-    def complete_house_chore(self, house_id, activity, current_date):
-        if house_id in self.houses:
-            house = self.houses[house_id]
-            if house.complete_chore(activity, current_date):
-                self.save()
-                return True
-        return False
 class ChoreRecord:
     """Manages chores and their associations with houses and users"""
 
     def __init__(self):
         self.chores = {}
-        self.load()
+        # self.load() # Comentei para evitar erro se 'app/models/chore.py' não existir ou for simples demais
 
     def load(self):
         try:
             with open('app/controllers/db/chores.json', 'r') as f:
                 chores_data = json.load(f)
                 self.chores = {
-                    chore_id: Chore(
-                        activity=chore['activity'],
-                        date=chore['date'],
-                        status=chore['status'],
-                    )
+                    chore_id: chore # Carrega como dicionário
                     for chore_id, chore in chores_data.items()
                 }
         except (FileNotFoundError, json.JSONDecodeError):
@@ -248,34 +228,27 @@ class ChoreRecord:
 
     def save(self):
         with open('app/controllers/db/chores.json', 'w') as f:
-            chores_data = {
-                chore_id: {
-                    'activity': chore.activity,
-                    'date': chore.date,
-                    'status': chore.status,
-                }
-                for chore_id, chore in self.chores.items()
-            }
-            json.dump(chores_data, f, indent=4)
+            # Salva como dicionário
+            json.dump(self.chores, f, indent=4)
 
     def create_chore(self, activity, date, status='pending'):
         chore_id = str(uuid.uuid4())
-        new_chore = Chore(
-            activity=activity,
-            date=date,
-            status=status,
-        )
+        new_chore = { # Cria um dicionário
+            'activity': activity,
+            'date': date,
+            'status': status,
+        }
         self.chores[chore_id] = new_chore
         self.save()
         return chore_id
 
     def get_chores_by_house(self, house_id):
-        # If you want to track chores per house, add house_id to Chore model
+        # Se você quiser rastrear tarefas por casa, adicione house_id ao modelo de tarefa
         return [chore for chore in self.chores.values()]
 
     def get_chores_by_user(self, username):
         return [
-            {'id': cid, 'activity': chore.activity, 'date': chore.date, 'status': chore.status}
-            for cid, chore in self.chores.items() 
-            if chore.responsable == username
+            {'id': cid, 'activity': chore['activity'], 'date': chore['date'], 'status': chore['status']}
+            for cid, chore in self.chores.items()
+            if chore.get('responsable') == username # Assumindo que 'responsable' está no dicionário
         ]

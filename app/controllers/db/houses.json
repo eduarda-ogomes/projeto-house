@@ -4,22 +4,25 @@
         "members": [
             "dudaggms",
             "carolzinha",
-            "Renatinho"
+            "Renatinho",
+            "livia"
         ],
         "chores": [
             {
                 "activity": "limpar cozinha",
                 "date": "2025-07-02",
-                "assigned_to": "dudaggms",
+                "assigned_to": "Renatinho",
                 "rotation_days": 7,
-                "next_due": "2025-07-09"
+                "next_due": "2025-07-02"
             },
             {
                 "activity": "limpar banheiro",
                 "date": "2025-07-04",
                 "assigned_to": "carolzinha",
                 "rotation_days": 7,
-                "next_due": "2025-07-11"
+                "next_due": "2025-07-11",
+                "last_completed_date": "2025-06-26",
+                "last_completed_by": "carolzinha"
             },
             {
                 "activity": "limpar vararanda",
@@ -31,12 +34,28 @@
             {
                 "activity": "bancada",
                 "date": "2025-07-03",
-                "assigned_to": "dudaggms",
+                "assigned_to": "carolzinha",
                 "rotation_days": 5,
-                "next_due": "2025-07-08"
+                "next_due": "2025-06-30"
+            },
+            {
+                "activity": "limpar cozinha",
+                "date": "2025-06-29",
+                "assigned_to": "carolzinha",
+                "rotation_days": 7,
+                "next_due": "2025-07-06"
+            },
+            {
+                "activity": "limpar sala",
+                "date": "2025-06-29",
+                "assigned_to": "dudaggms",
+                "rotation_days": 7,
+                "next_due": "2025-06-29",
+                "last_completed_date": null,
+                "last_completed_by": null
             }
         ],
-        "last_member": 1
+        "last_member": 2
     },
     "0d6c7d3b-e8ea-4f47-a1c6-7ab2077b8e04": {
         "name": "casinha",

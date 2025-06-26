@@ -6,14 +6,13 @@
    <title>Homepage</title>
 
    <link rel="stylesheet" href="/static/css/menu.css">
-
-   <link rel="stylesheet" href="/static/css/homepage_no_house.css">
-
+   <link rel="stylesheet" href="/static/css/homepage.css"> 
+   
    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
    <script src="/static/js/menu.js" defer></script>
-</head>
+   </head>
 <body>
    <nav class="menu_lateral">
       <div class="btn_expandir">
@@ -48,99 +47,148 @@
       </ul>
    </nav>
 
-
    <nav class="homepage">
       <div class="container">
-         <h1>Bem-vindo, {{ user.fullname }} à sua casa {{ house.name }}!</h1>
+         <h1 style="text-align: center;">Bem-vindo, {{ user.fullname }} à sua casa: {{ house.name }}!</h1>
 
-         <h3>Moradores</h3>
-         <ul>
-            % if house.members:
-               % for member_username in house.members:
-                  <li>{{ member_username }}</li>
-               % end
-            % else:
-               <li>Nenhum morador encontrado.</li>
-            % end
-         </ul>
+         <div class="content-columns">
+            <div class="left-column">
+                <div class="my-chores-section">
+                    <h3>Minhas Tarefas</h3>
+                    <ul class="task-list">
+                        % if my_chores:
+                            % for chore in my_chores:
+                                <li>
+                                    <strong>Atividade:</strong> {{ chore['activity'] }} <br>
+                                    % try:
+                                        % due_date_str = chore.get('next_due') or chore['date']
+                                        % due_date = datetime.datetime.strptime(due_date_str, '%Y-%m-%d').date()
+                                        % today = datetime.date.today()
+                                        % days_remaining = (due_date - today).days
+                                    % except (ValueError, KeyError):
+                                        % days_remaining = 'N/A'
+                                    % end
+                                    
+                                    % if days_remaining != 'N/A':
+                                        % if days_remaining == 0:
+                                            <strong>Dias para completar:</strong> Hoje!
+                                        % elif days_remaining > 0:
+                                            <strong>Dias para completar:</strong> {{ days_remaining }} dias
+                                        % else:
+                                            <strong>Dias para completar:</strong> Atrasada em {{ abs(days_remaining) }} dias
+                                        % end
+                                    % else:
+                                        <strong>Dias para completar:</strong> N/A
+                                    % end
 
-         <div class="adicionar-usuario">
-            <h3>Adicionar Usuário</h3>
-            <form action="/add_member" method="POST">
-               <input type="text" name="username" placeholder="Nome do Usuário" required>
-               <button type="submit" class="btn-default">Adicionar Morador</button>
-            </form>
-         </div> 
+                                    % if chore.get('last_completed_date'):
+                                        <p style="color: #00ff88; font-size: 0.9em;">Concluída por {{ chore.get('last_completed_by', 'alguém') }} em {{ chore['last_completed_date'] }}</p>
+                                    % end
 
-                  <h3>Minhas Tarefas</h3>
-         <ul>
-            % if my_chores:
-               % for chore in my_chores:
-                  <li>
-                     <strong>Atividade:</strong> {{ chore['activity'] }} <br>
-                     <strong>Data de Cadastro/Vencimento:</strong> {{ chore['date'] }} <br>
-                     <strong>Atribuída a:</strong> Você <br>
-                     % if chore.get('rotation_days') is not None and chore.get('rotation_days', 0) > 0:
-                        <strong>Rotatividade:</strong> A cada {{ chore.get('rotation_days', 'N/A') }} dias <br>
-                        <strong>Próxima Troca (aproximada):</strong> {{ chore.get('next_due', 'N/A') }} <br>
-                     % end
-                     <form action="/complete_chore/{{ house.id }}" method="POST" style="display:inline;">
-                        <input type="hidden" name="activity" value="{{ chore['activity'] }}">
-                        <input type="hidden" name="current_date" value="{{ datetime.date.today().strftime('%Y-%m-%d') }}">
-                        <button type="submit" class="btn-small">Marcar como Completa</button>
-                     </form>
-                  </li>
-                  <hr>
-               % end
-            % else:
-               <li>Nenhuma tarefa atribuída a você no momento.</li>
-            % end
-         </ul>
+                                    <form action="/complete_chore/{{ house.id }}" method="POST" style="display:inline;" class="complete-chore-form">
+                                        <input type="hidden" name="activity" value="{{ chore['activity'] }}">
+                                        <label>
+                                            <input type="checkbox" class="complete-chore-checkbox"
+                                                {{'checked' if chore.get('last_completed_date') else ''}}
+                                                {{'disabled' if chore.get('last_completed_date') else ''}}
+                                            > Marcar como Completa
+                                        </label>
+                                    </form>
+                                </li>
+                                <hr>
+                            % end
+                        % else:
+                            <li>Nenhuma tarefa atribuída a você no momento.</li>
+                        % end
+                    </ul>
+                </div>
 
-         <h3>Tarefas dos Outros Moradores</h3>
-         <ul>
-            % if other_chores:
-               % for chore in other_chores:
-                  <li>
-                     <strong>Atividade:</strong> {{ chore['activity'] }} <br>
-                     <strong>Data de Cadastro/Vencimento:</strong> {{ chore['date'] }} <br>
-                     <strong>Atribuída a:</strong> {{ chore.get('assigned_to', 'N/A') }} <br>
-                     % if chore.get('rotation_days') is not None and chore.get('rotation_days', 0) > 0:
-                        <strong>Rotatividade:</strong> A cada {{ chore.get('rotation_days', 'N/A') }} dias <br>
-                        <strong>Próxima Troca (aproximada):</strong> {{ chore.get('next_due', 'N/A') }} <br>
-                     % end
-                  </li>
-                  <hr>
-               % end
-            % else:
-               <li>Nenhuma tarefa atribuída a outros moradores no momento.</li>
-            % end
-         </ul>
+                <div class="other-chores-section">
+                    <h3>Tarefas dos Outros Moradores</h3>
+                    <ul class="task-list">
+                        % if other_chores:
+                            % for chore in other_chores:
+                                <li>
+                                    <strong>Atividade:</strong> {{ chore['activity'] }} 
+                                    <strong>Atribuída a:</strong> {{ chore.get('assigned_to', 'N/A') }} 
+                                    % try:
+                                        % due_date_str = chore.get('next_due') or chore['date']
+                                        % due_date = datetime.datetime.strptime(due_date_str, '%Y-%m-%d').date()
+                                        % today = datetime.date.today()
+                                        % days_remaining = (due_date - today).days
+                                    % except (ValueError, KeyError):
+                                        % days_remaining = 'N/A'
+                                    % end
 
-         <div class="adicionar-tarefa">
-            <h3><i class="fas fa-tasks"></i> Adicionar Nova Tarefa</h3>
-            <form action="/add_chore" method="POST">
-               <div class="form-group">
-                  <label for="activity">Descrição da Tarefa:</label>
-                  <input type="text" id="activity" name="activity" placeholder="Ex: Limpar a cozinha" required>
-               </div>
-               <div class="form-group"> <label for="date">Data de Vencimento Inicial:</label>
-                  <input type="date" id="date" name="date" required>
-               </div>
-               <div class="form-group" style="margin-top: 15px;">
-                  <label for="rotation_days">Rotatividade (dias):</label>
-                  <input type="number" id="rotation_days" name="rotation_days" min="0" placeholder="0 para sem rotação">
-                  <small>Deixe 0 para não ter rotatividade.</small>
-               </div>
-               
-               <button type="submit" class="btn-default" style="margin-top: 20px;">
-                  <i class="fas fa-plus-circle"></i> Adicionar Tarefa
-               </button>
-            </form>
-         </div>
+                                    % if days_remaining != 'N/A':
+                                        % if days_remaining == 0:
+                                            <strong>Vencimento:</strong> Hoje!
+                                        % elif days_remaining > 0:
+                                            <strong>Vencimento:</strong> {{ days_remaining }} dias
+                                        % else:
+                                            <strong>Vencimento:</strong> Atrasada em {{ abs(days_remaining) }} dias
+                                        % end
+                                    % else:
+                                        <strong>Vencimento:</strong> N/A
+                                    % end
+                                </li>
+                                <hr>
+                            % end
+                        % else:
+                            <li>Nenhuma tarefa atribuída a outros moradores no momento.</li>
+                        % end
+                    </ul>
+                </div>
 
-         
-      </div>
-   </nav>
+                <div class="add-chore-section" id="addChoreForm">
+                    <h3><i class="fas fa-tasks"></i> Adicionar Nova Tarefa</h3>
+                    <form action="/add_chore" method="POST"> 
+                        <div class="form-group">
+                            <label for="activity">Descrição da Tarefa:</label>
+                            <input type="text" id="activity" name="activity" placeholder="Ex: Limpar a cozinha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Data de Vencimento Inicial:</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+                        <div class="form-group"> 
+                            <label for="rotation_days">Rotatividade (dias):</label>
+                            <input type="number" id="rotation_days" name="rotation_days" min="0" placeholder="0 para sem rotação">
+                            <small>Deixe 0 para não ter rotatividade.</small>
+                        </div>
+                        
+                        <button type="submit" class="btn-default"> 
+                            <i class="fas fa-plus-circle"></i> Adicionar Tarefa
+                        </button>
+                    </form>
+                </div>
+            </div> <div class="right-column">
+                <div class="members-section">
+                    <h3>Moradores</h3>
+                    <ul class="member-list">
+                        % if house.members:
+                            % for member_username in house.members:
+                                <li>
+                                    <i class="bi bi-person-circle avatar-icon"></i> {{ member_username }}
+                                </li>
+                            % end
+                        % else:
+                            <li>Nenhum morador encontrado.</li>
+                        % end
+                    </ul>
+                </div>
+
+                <div class="add-member-section" id="addMemberForm">
+                    <h3>Adicionar Usuário</h3>
+                    <form action="/add_member" method="POST">
+                        <div class="form-group">  
+                            <label for="username">Nome do Usuário:</label> 
+                            <input type="text" id="username" name="username" placeholder="Nome do Usuário" required>
+                        </div>
+                        <button type="submit" class="btn-default">Adicionar Morador</button>
+                    </form>
+                </div>
+            </div> </div> </div> </nav>
+
 </body>
 </html>
