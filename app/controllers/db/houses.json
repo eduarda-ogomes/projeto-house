@@ -3,13 +3,47 @@
         "name": "republica",
         "members": [
             "dudaggms",
-            "carolzinha"
-        ]
+            "carolzinha",
+            "Renatinho"
+        ],
+        "chores": [
+            {
+                "activity": "limpar cozinha",
+                "date": "2025-07-02",
+                "assigned_to": "dudaggms",
+                "rotation_days": 7,
+                "next_due": "2025-07-09"
+            },
+            {
+                "activity": "limpar banheiro",
+                "date": "2025-07-04",
+                "assigned_to": "carolzinha",
+                "rotation_days": 7,
+                "next_due": "2025-07-11"
+            },
+            {
+                "activity": "limpar vararanda",
+                "date": "2025-07-04",
+                "assigned_to": "Renatinho",
+                "rotation_days": 7,
+                "next_due": "2025-07-11"
+            },
+            {
+                "activity": "bancada",
+                "date": "2025-07-03",
+                "assigned_to": "dudaggms",
+                "rotation_days": 5,
+                "next_due": "2025-07-08"
+            }
+        ],
+        "last_member": 1
     },
     "0d6c7d3b-e8ea-4f47-a1c6-7ab2077b8e04": {
         "name": "casinha",
         "members": [
             "Renatinho"
-        ]
+        ],
+        "chores": [],
+        "last_member": 0
     }
 }

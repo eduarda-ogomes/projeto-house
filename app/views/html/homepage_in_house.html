@@ -5,12 +5,13 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Homepage</title>
 
-   <!-- Arquivo CSS -->
    <link rel="stylesheet" href="/static/css/menu.css">
-   <link rel="stylesheet" href="/static/css/homepage_no_house.css">
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
-   <!-- Arquivo JavaScript -->
+   <link rel="stylesheet" href="/static/css/homepage_no_house.css">
+
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
    <script src="/static/js/menu.js" defer></script>
 </head>
 <body>
@@ -28,12 +29,6 @@
          </li>
          <li class="item_menu">
             <a href="#">
-               <span class="icon"><i class="bi bi-columns-gap"></i></span>
-               <span class="text_link">Dashboard</span>
-            </a>
-         </li>
-         <li class="item_menu">
-            <a href="#">
                <span class="icon"><i class="bi bi-gear"></i></span>
                <span class="text_link">Configurações</span>
             </a>
@@ -44,84 +39,107 @@
                <span class="text_link">Perfil</span>
             </a>
          </li>
+         <li class="item_menu">
+            <a href="#">
+               <span class="icon"></span>
+               <span class="text_link"></span>
+            </a>
+         </li>
       </ul>
    </nav>
 
+
    <nav class="homepage">
       <div class="container">
-         <h1>Bem-vindo, {{ user.fullname }} a sua casa!</h1>
-         <section style="margin-top: 40px;">
-            <form action="/logout" method="POST">
-               <button type="submit" class="logout-btn">Sair</button>
+         <h1>Bem-vindo, {{ user.fullname }} à sua casa {{ house.name }}!</h1>
+
+         <h3>Moradores</h3>
+         <ul>
+            % if house.members:
+               % for member_username in house.members:
+                  <li>{{ member_username }}</li>
+               % end
+            % else:
+               <li>Nenhum morador encontrado.</li>
+            % end
+         </ul>
+
+         <div class="adicionar-usuario">
+            <h3>Adicionar Usuário</h3>
+            <form action="/add_member" method="POST">
+               <input type="text" name="username" placeholder="Nome do Usuário" required>
+               <button type="submit" class="btn-default">Adicionar Morador</button>
             </form>
-         </section>
-      </div>
+         </div> 
 
-      <div class="container">
-         <div class="tarefas">
-            <h2>Tarefas do Morador</h2>
-            <ul>
-               <li>
-                  <input type="checkbox" id="tarefa1">
-                  <label for="tarefa1">Tarefa 1</label>
-               </li>
-               <li>
-                  <input type="checkbox" id="tarefa2">
-                  <label for="tarefa2">Tarefa 2</label>
-               </li>
-            </ul>
+                  <h3>Minhas Tarefas</h3>
+         <ul>
+            % if my_chores:
+               % for chore in my_chores:
+                  <li>
+                     <strong>Atividade:</strong> {{ chore['activity'] }} <br>
+                     <strong>Data de Cadastro/Vencimento:</strong> {{ chore['date'] }} <br>
+                     <strong>Atribuída a:</strong> Você <br>
+                     % if chore.get('rotation_days') is not None and chore.get('rotation_days', 0) > 0:
+                        <strong>Rotatividade:</strong> A cada {{ chore.get('rotation_days', 'N/A') }} dias <br>
+                        <strong>Próxima Troca (aproximada):</strong> {{ chore.get('next_due', 'N/A') }} <br>
+                     % end
+                     <form action="/complete_chore/{{ house.id }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="activity" value="{{ chore['activity'] }}">
+                        <input type="hidden" name="current_date" value="{{ datetime.date.today().strftime('%Y-%m-%d') }}">
+                        <button type="submit" class="btn-small">Marcar como Completa</button>
+                     </form>
+                  </li>
+                  <hr>
+               % end
+            % else:
+               <li>Nenhuma tarefa atribuída a você no momento.</li>
+            % end
+         </ul>
 
-            <h3>Todas as Tarefas da Casa</h3>
-            <ul>
-               <li>Tarefa A - Atribuída a Morador 1 - Concluída</li>
-               <li>Tarefa B - Atribuída a Morador 2 - Não Concluída</li>
-            </ul>
-         </div>
+         <h3>Tarefas dos Outros Moradores</h3>
+         <ul>
+            % if other_chores:
+               % for chore in other_chores:
+                  <li>
+                     <strong>Atividade:</strong> {{ chore['activity'] }} <br>
+                     <strong>Data de Cadastro/Vencimento:</strong> {{ chore['date'] }} <br>
+                     <strong>Atribuída a:</strong> {{ chore.get('assigned_to', 'N/A') }} <br>
+                     % if chore.get('rotation_days') is not None and chore.get('rotation_days', 0) > 0:
+                        <strong>Rotatividade:</strong> A cada {{ chore.get('rotation_days', 'N/A') }} dias <br>
+                        <strong>Próxima Troca (aproximada):</strong> {{ chore.get('next_due', 'N/A') }} <br>
+                     % end
+                  </li>
+                  <hr>
+               % end
+            % else:
+               <li>Nenhuma tarefa atribuída a outros moradores no momento.</li>
+            % end
+         </ul>
 
-         <div class="moradores">
-            <h2>Moradores da Casa</h2>
-            <ul>
-               <li>Morador 1</li>
-               <li>Morador 2</li>
-               <li>Morador 3</li>
-            </ul>
-            <div class="adicionar-usuario">
-               <h3>Adicionar Usuário</h3>
-               <form action="/add_member" method="POST">
-                  <input type="text" name="username" placeholder="Nome do Usuário" required>
-                  <button type="submit" class="btn-default">Adicionar Morador</button>
-               </form>
-            </div> 
-            
-            <div class="chore-form-container">
-               <h3><i class="fas fa-tasks"></i> Adicionar Nova Tarefa</h3>
+         <div class="adicionar-tarefa">
+            <h3><i class="fas fa-tasks"></i> Adicionar Nova Tarefa</h3>
+            <form action="/add_chore" method="POST">
+               <div class="form-group">
+                  <label for="activity">Descrição da Tarefa:</label>
+                  <input type="text" id="activity" name="activity" placeholder="Ex: Limpar a cozinha" required>
+               </div>
+               <div class="form-group"> <label for="date">Data de Vencimento Inicial:</label>
+                  <input type="date" id="date" name="date" required>
+               </div>
+               <div class="form-group" style="margin-top: 15px;">
+                  <label for="rotation_days">Rotatividade (dias):</label>
+                  <input type="number" id="rotation_days" name="rotation_days" min="0" placeholder="0 para sem rotação">
+                  <small>Deixe 0 para não ter rotatividade.</small>
+               </div>
                
-               <form action="/add_chore" method="POST" class="chore-form">
-                   <div class="form-group">
-                       <label for="activity">Descrição da Tarefa:</label>
-                       <input type="text" id="activity" name="activity" required 
-                              placeholder="Ex: Limpar a cozinha">
-                   </div>
-                   
-                   <div class="form-row">
-                       <div class="form-group">
-                           <label for="date">Data:</label>
-                           <input type="date" id="date" name="date" required>
-                       </div>
-                       
-                      
-                   </div>
-                   
-                   <button type="submit" class="btn-submit">
-                       <i class="fas fa-plus-circle"></i> Adicionar Tarefa
-                   </button>
-               </form>
-           </div>
-           
-           
-            
-
+               <button type="submit" class="btn-default" style="margin-top: 20px;">
+                  <i class="fas fa-plus-circle"></i> Adicionar Tarefa
+               </button>
+            </form>
          </div>
+
+         
       </div>
    </nav>
 </body>

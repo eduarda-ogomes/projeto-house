@@ -1,6 +1,7 @@
 from app.controllers.datarecord import UserRecord, MessageRecord,HouseRecord, ChoreRecord
 from bottle import template, redirect, request, response, Bottle, static_file
 import socketio
+import datetime
 
 
 class Application:
@@ -96,24 +97,38 @@ class Application:
             self.insert_user(fullname,username,birthdate, email, password, confirm_password, gender)
             return self.render('portal')
         
-
-
-
         @self.app.route('/homepage', method='GET')
         def homepage_getter():
             current_user = self.getCurrentUserBySessionId()
             if not current_user:
-                return redirect('/portal')  # User not authenticated
+                return redirect('/portal')  # Usuário não autenticado
 
             house = self.__houses.get_house_by_user(current_user.username)
             if house:
-                # User is in a house, render house information
-                return template('app/views/html/homepage_in_house', user=current_user, house=house)
+                # --- LÓGICA DE FILTRAGEM AQUI ---
+                my_chores = []
+                other_chores = []
+                for chore in house.chores:
+                    # Usar .get() aqui também para garantir que não haja KeyError se o JSON estiver antigo
+                    if chore.get('assigned_to') == current_user.username:
+                        my_chores.append(chore)
+                    else:
+                        other_chores.append(chore)
+                # --- FIM DA LÓGICA DE FILTRAGEM ---
+
+                # Passa as listas filtradas para o template
+                return template(
+                    'app/views/html/homepage_in_house',
+                    user=current_user,
+                    house=house,
+                    my_chores=my_chores,      # NOVA VARIÁVEL
+                    other_chores=other_chores, # NOVA VARIÁVEL
+                    datetime=datetime          # Mantenha o datetime
+                )
             else:
-                # User is not in a house, render options to create/join a house
+                # ... (sua lógica para usuário sem casa)
                 houses_list = self.__houses.list_houses()
                 return template('app/views/html/homepage_no_house', user=current_user, houses=houses_list)
-            
 
             
         @self.app.route('/create_house', method='POST')
@@ -157,27 +172,53 @@ class Application:
                 return redirect('/homepage')  # Redireciona para a homepage após adicionar
             return redirect('/homepage')  # Redireciona se o usuário não for membro da casa
         
-        @self.app.route('/add_chore', method='POST')
-        def add_chore():
+        @self.app.post('/add_chore')
+        def add_chore_post():
             current_user = self.getCurrentUserBySessionId()
             if not current_user:
                 return redirect('/portal')
 
+            house = self.__houses.get_house_by_user(current_user.username)
+            if not house:
+                return "Erro: Usuário não pertence a uma casa." # Ou redirecionar
+
             activity = request.forms.get('activity')
-            date = request.forms.get('date')
+            date_str = request.forms.get('date')
+            rotation_days_str = request.forms.get('rotation_days')
 
-            if not all([activity, date]):
-                return redirect('/homepage')  # Add error handling if needed
+            rotation_days = None
+            if rotation_days_str:
+                try:
+                    rotation_days = int(rotation_days_str)
+                    if rotation_days < 0:
+                        rotation_days = 0 # Garante que não seja negativo
+                except ValueError:
+                    rotation_days = 0 # Se não for um número válido, sem rotação
 
+            if activity and date_str:
+                if self.__houses.add_chore_to_house(house.id, activity, date_str, rotation_days):
+                    return redirect('/homepage')
+            return "Erro ao adicionar tarefa." # Melhorar mensagem de erro
 
-            self.__chores.create_chore(
-                activity=activity,
-                date=date,
-            )
-            return redirect('/homepage')
+        # NOVA ROTA para completar tarefa
+        @self.app.post('/complete_chore/<house_id>')
+        def complete_chore_post(house_id):
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user:
+                return redirect('/portal')
 
+            # Validação adicional: verificar se o current_user realmente pertence à house_id
+            house = self.__houses.get_house_by_user(current_user.username)
+            if not house or house.id != house_id:
+                return "Acesso negado ou casa inválida."
 
-            
+            activity = request.forms.get('activity')
+            current_date_str = request.forms.get('current_date', datetime.date.today().strftime('%Y-%m-%d')) # Pega a data de hoje como fallback
+
+            if activity:
+                if self.__houses.complete_house_chore(house_id, activity, current_date_str):
+                    return redirect('/homepage')
+            return "Erro ao completar tarefa."
 
 
         @self.app.route('/logout', method='POST')

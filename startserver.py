@@ -1,5 +1,9 @@
 from app.controllers.application import Application
+from bottle import TEMPLATE_PATH
+import os
 
+# Adiciona a pasta onde estão os .tpl
+TEMPLATE_PATH.insert(0, os.path.abspath('./app/views/html'))
 
 # Inicialize a aplicação
 app = Application()

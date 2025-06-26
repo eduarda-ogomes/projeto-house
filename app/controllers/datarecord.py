@@ -165,7 +165,9 @@ class HouseRecord:
                     house_id: House(
                         house_id=house_id,
                         name=house['name'],
-                        members=house.get('members', [])
+                        members=house.get('members', []),
+                        chores=house.get('chores', []),
+                        last_member=house.get('last_member',0)
                     )
                     for house_id, house in houses_data.items()  # Corrigido para usar house_id e house
                 }
@@ -177,11 +179,14 @@ class HouseRecord:
             houses_data = {
                 house_id: {
                     'name': house.name,
-                    'members': house.members
+                    'members': house.members,
+                    'chores': house.chores,
+                    'last_member': house.last_member
                 }
                 for house_id, house in self.houses.items()  # Corrigido para usar house_id e house
             }
             json.dump(houses_data, f, indent=4)
+
 
     def create_house(self, name, owner_username):
         house_id = str(uuid.uuid4())
@@ -189,14 +194,13 @@ class HouseRecord:
         self.houses[house_id] = new_house
         self.save()
         return house_id
-
-    def add_user_to_house(self, house_id, username):
+    
+    def add_chore_to_house(self, house_id, activity, date,rotation_days=None): # Adicionado 'activity', 'date'
         if house_id in self.houses:
             house = self.houses[house_id]
-            if username not in house.members:
-                house.add_member(username)
-                self.save()
-                return True
+            house.add_chore(activity, date, rotation_days) # Passando ambos os parâmetros
+            self.save()
+            return True
         return False
 
     def get_house_by_user(self, username):
@@ -212,7 +216,14 @@ class HouseRecord:
     def list_houses(self):
         """Retorna lista de casas com id e nome, para escolha do usuário"""
         return [{'id': house_id, 'name': house.name} for house_id, house in self.houses.items()]
-# First, let's update the ChoreRecord class to match your model
+
+    def complete_house_chore(self, house_id, activity, current_date):
+        if house_id in self.houses:
+            house = self.houses[house_id]
+            if house.complete_chore(activity, current_date):
+                self.save()
+                return True
+        return False
 class ChoreRecord:
     """Manages chores and their associations with houses and users"""
 
@@ -229,10 +240,6 @@ class ChoreRecord:
                         activity=chore['activity'],
                         date=chore['date'],
                         status=chore['status'],
-                        responsable=UserAccount(
-                            username=chore['responsable'],
-                            # Add other required UserAccount fields if needed
-                        )
                     )
                     for chore_id, chore in chores_data.items()
                 }
