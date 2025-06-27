@@ -36,7 +36,7 @@ nav.homepage {
     text-align: center;
     margin-bottom: 30px;
     color: #77ffc0; /* Cor do título principal (igual ao h1 do login) */
-    font-size: 2.5em; /* Ajuste o tamanho da fonte conforme preferir */
+    font-size: 2.0em; /* Ajuste o tamanho da fonte conforme preferir */
     font-weight: 800;
 }
 

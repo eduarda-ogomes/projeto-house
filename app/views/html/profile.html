@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil</title>
+    <link rel="stylesheet" href="/static/css/style.css"> 
+    <link rel="stylesheet" href="/static/css/menu.css"> 
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+   <script src="/static/js/menu.js" defer></script>
+</head>
+<body>
+    <nav class="menu_lateral">
+        <div class="btn_expandir">
+           <i class="bi bi-list" id="btn_exp"></i>
+        </div>
+  
+        <ul>
+           <li class="item_menu">
+              <a href="/homepage"> 
+                 <span class="icon"><i class="bi bi-house-door"></i></span>
+                 <span class="text_link">Home</span>
+              </a>
+           </li>
+           <li class="item_menu">
+              <a href="/config"> 
+                 <span class="icon"><i class="bi bi-gear"></i></span>
+                 <span class="text_link">Configurações</span>
+              </a>
+           </li>
+           <li class="item_menu ativo"> <a href="/profile"> 
+                 <span class="icon"><i class="bi bi-person"></i></span>
+                 <span class="text_link">Perfil</span>
+              </a>
+           </li>
+            <li class="item_menu">
+                <form action="/logout" method="POST" style="margin: 0; padding: 0;">
+                    <button type="submit" class="logout-button">
+                        <span class="icon"><i class="bi bi-box-arrow-right"></i></span>
+                        <span class="text_link">Sair</span>
+                    </button>
+                </form>
+            </li>
+        </ul>
+     </nav>
+
+    <div class="content-wrapper">
+        <header class="page-header"> 
+            <h1>Meu Perfil</h1> 
+        </header>
+
+        <main class="main-content">
+            % if defined('message'):
+                <p class="message success">{{message}}</p>
+            % end
+            % if defined('error'):
+                <p class="message error">{{error}}</p>
+            % end
+
+            <div class="profile-card-container"> <div class="form-container"> <h3 class="card-title">Informações Pessoais</h3> <form action="/update_profile" method="POST" class="profile-form">
+                        <div class="form-group">
+                            <label for="fullname">Nome Completo:</label>
+                            <input type="text" id="fullname" name="fullname" value="{{user.fullname}}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="username">Nome de Usuário:</label>
+                            <input type="text" id="username" name="username" value="{{user.username}}" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" value="{{user.email}}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="birthdate">Data de Nascimento:</label>
+                            <input type="date" id="birthdate" name="birthdate" value="{{user.birthdate}}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gênero:</label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Selecione</option>
+                                <option value="Masculino" % if user.gender == 'Masculino': selected %end>Masculino</option>
+                                <option value="Feminino" % if user.gender == 'Feminino': selected %end>Feminino</option>
+                                <option value="Outro" % if user.gender == 'Outro': selected %end>Outro</option>
+                                <option value="Prefiro não dizer" % if user.gender == 'Prefiro não dizer': selected %end>Prefiro não dizer</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Nova Senha (opcional):</label>
+                            <input type="password" id="password" name="password">
+                            <small>Deixe em branco para manter a senha atual.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm_password">Confirmar Nova Senha:</label>
+                            <input type="password" id="confirm_password" name="confirm_password">
+                        </div>
+
+                        <button type="submit" class="btn-default">Atualizar Perfil</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

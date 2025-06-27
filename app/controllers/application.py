@@ -24,7 +24,6 @@ class Application:
         self.__users = UserRecord()
         self.__messages = MessageRecord()
         self.__houses = HouseRecord()
-        # self.__chores = ChoreRecord() # Comentado, pois não é usado para as tarefas da House
 
         self.edited = None
         self.removed = None
@@ -84,6 +83,19 @@ class Application:
             print(username + ' sendo atualizado...')
             self.update_user(username, password)
             return self.render('edit')
+        
+        @self.app.get('/profile')
+        def profile_page():
+            session_id = request.get_cookie("session_id")
+            current_user = None
+            if session_id:
+                current_user = self.__users.getCurrentUser(session_id)
+
+            if not current_user:
+                return redirect('/portal')
+            
+            return template('profile', user=current_user)
+
 
         @self.app.route('/cadastro', method='GET')
         def create_getter():
@@ -242,20 +254,18 @@ class Application:
             if not house:
                 return HTTPError(404, "Casa não encontrada para adicionar tarefa.")
 
-            # Não há mais verificação de duplicidade da tarefa aqui
-
+            # --- MODIFICAÇÃO AQUI: Chamada a house.add_chore ---
+            # Removido o argumento 'assigned_to'
             house.add_chore(
                 activity=activity,
-                date=date_str,
-                assigned_to=current_user.username,
+                date_str=date_str, # Use date_str conforme definido no House
                 rotation_days=rotation_days,
-                next_due=date_str
+                next_due=date_str # Pode ser a data inicial para o primeiro vencimento
             )
             self.__houses.save()
 
             return redirect('/homepage')
-            
-
+        
         @self.app.post('/complete_chore/<house_id>')
         def complete_chore_post(house_id):
             current_user = self.getCurrentUserBySessionId()
@@ -347,11 +357,70 @@ class Application:
             self.__houses.save()
             return redirect('/homepage')
 
+        @self.app.post('/update_profile')
+        def update_profile():
+            current_user = self.getCurrentUserBySessionId()
+            if not current_user:
+                return redirect('/portal') # Redireciona se não estiver logado
+
+            # Pega os dados do formulário
+            fullname = request.forms.get('fullname').strip()
+            email = request.forms.get('email').strip()
+            birthdate = request.forms.get('birthdate').strip()
+            gender = request.forms.get('gender').strip()
+            new_password = request.forms.get('password')
+            confirm_password = request.forms.get('confirm_password')
+
+            # Validações básicas
+            if not fullname or not email or not birthdate or not gender:
+                return template('profile', user=current_user, error="Todos os campos obrigatórios devem ser preenchidos.")
+
+            # Validação de email (básica)
+            if '@' not in email or '.' not in email:
+                return template('profile', user=current_user, error="Formato de email inválido.")
+
+            # Validação de senhas
+            if new_password: # Se uma nova senha foi fornecida
+                if new_password != confirm_password:
+                    return template('profile', user=current_user, error="As novas senhas não coincidem.")
+                if len(new_password) < 6: # Exemplo de regra de senha
+                    return template('profile', user=current_user, error="A nova senha deve ter no mínimo 6 caracteres.")
+                
+                # Atualiza a senha (no UserAccount e UserRecord)
+                # Você precisa de um método para atualizar no UserRecord
+                # Algo como self.__users.updateUserPassword(current_user.username, new_password)
+                # Ou o setUser que você já tem:
+                self.setUser(current_user.username, new_password) # <-- Usando seu setUser existente
+
+            try:
+                # Atualiza os atributos do objeto user (que é o current_user)
+                current_user.fullname = fullname
+                current_user.email = email
+                current_user.birthdate = birthdate
+                current_user.gender = gender
+                self.__users.updateUser(current_user) # <--- VOCÊ PRECISARÁ IMPLEMENTAR ISSO
+                return template('profile', user=current_user, message="Perfil atualizado com sucesso!")
+            
+            except Exception as e:
+                print(f"Erro ao atualizar perfil: {e}")
+                return template('profile', user=current_user, error="Ocorreu um erro ao atualizar o perfil.")
+
 
         @self.app.route('/logout', method='POST')
         def logout_action():
             self.logout_user()
             return self.render('portal')
+        
+        def logout_user(self):
+            session_id = request.get_cookie("session_id")
+            if session_id:
+                # Invalida a sessão no seu UserRecord (se implementado)
+                self.__users.invalidateSession(session_id) 
+
+            # Remove o cookie da sessão do navegador
+            response.set_cookie("session_id", "", expires=0, path='/')
+            print(f"DEBUG: Usuário deslogado. Cookie de sessão removido.")
+
 
         @self.app.route('/delete', method='GET')
         def delete_getter():

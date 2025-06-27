@@ -3,66 +3,111 @@
         "name": "republica",
         "members": [
             "dudaggms",
-            "carolzinha",
-            "Renatinho",
-            "livia"
+            "livia",
+            "carolzinha"
         ],
         "chores": [
             {
-                "activity": "limpar cozinha",
-                "date": "2025-07-02",
-                "assigned_to": "Renatinho",
-                "rotation_days": 7,
-                "next_due": "2025-07-02"
-            },
-            {
-                "activity": "limpar banheiro",
-                "date": "2025-07-04",
-                "assigned_to": "carolzinha",
-                "rotation_days": 7,
-                "next_due": "2025-07-11",
-                "last_completed_date": "2025-06-26",
-                "last_completed_by": "carolzinha"
+                "activity": "bancada",
+                "date": "2025-06-29",
+                "assigned_to": "dudaggms",
+                "rotation_days": 5,
+                "next_due": "2025-07-04",
+                "last_completed_date": null,
+                "last_completed_by": null
             },
             {
                 "activity": "limpar vararanda",
-                "date": "2025-07-04",
-                "assigned_to": "Renatinho",
-                "rotation_days": 7,
-                "next_due": "2025-07-11"
-            },
-            {
-                "activity": "bancada",
-                "date": "2025-07-03",
-                "assigned_to": "carolzinha",
-                "rotation_days": 5,
-                "next_due": "2025-06-30"
-            },
-            {
-                "activity": "limpar cozinha",
-                "date": "2025-06-29",
-                "assigned_to": "carolzinha",
-                "rotation_days": 7,
-                "next_due": "2025-07-06"
-            },
-            {
-                "activity": "limpar sala",
-                "date": "2025-06-29",
+                "date": "2025-06-30",
                 "assigned_to": "dudaggms",
                 "rotation_days": 7,
-                "next_due": "2025-06-29",
+                "next_due": "2025-07-07",
+                "last_completed_date": null,
+                "last_completed_by": null
+            },
+            {
+                "activity": "cozinha",
+                "date": "2025-07-03",
+                "assigned_to": "livia",
+                "rotation_days": 6,
+                "next_due": "2025-07-09",
+                "last_completed_date": null,
+                "last_completed_by": null
+            },
+            {
+                "activity": "banheiro",
+                "date": "2025-07-09",
+                "assigned_to": "livia",
+                "rotation_days": 5,
+                "next_due": "2025-07-14",
+                "last_completed_date": null,
+                "last_completed_by": null
+            },
+            {
+                "activity": "quarto",
+                "date": "2025-07-10",
+                "assigned_to": "dudaggms",
+                "rotation_days": 6,
+                "next_due": "2025-07-16",
                 "last_completed_date": null,
                 "last_completed_by": null
             }
         ],
-        "last_member": 2
+        "last_member": 1
     },
     "0d6c7d3b-e8ea-4f47-a1c6-7ab2077b8e04": {
         "name": "casinha",
         "members": [
-            "Renatinho"
+            "Renatinho",
+            "carolzinha"
         ],
-        "chores": [],
+        "chores": [
+            {
+                "activity": "cozinha",
+                "date": "2025-06-29",
+                "assigned_to": "Renatinho",
+                "rotation_days": 7,
+                "next_due": "2025-06-29",
+                "last_completed_date": null,
+                "last_completed_by": null
+            },
+            {
+                "activity": "sala",
+                "date": "2025-06-29",
+                "assigned_to": "Renatinho",
+                "rotation_days": 7,
+                "next_due": "2025-06-29",
+                "last_completed_date": null,
+                "last_completed_by": null
+            },
+            {
+                "activity": "quarto",
+                "date": "2025-07-09",
+                "assigned_to": "carolzinha",
+                "rotation_days": 7,
+                "next_due": "2025-07-16",
+                "last_completed_date": null,
+                "last_completed_by": null
+            }
+        ],
+        "last_member": 0
+    },
+    "a44a1cf2-2db2-4dc2-8642-7ea858d8a862": {
+        "name": "casa-otacilio",
+        "members": [
+            "Gabriel_vieira"
+        ],
+        "chores": [
+            {
+                "activity": "catar o coco do cachorro",
+                "date": "2025-06-27",
+                "assigned_to": "Gabriel_vieira",
+                "rotation_days": 1,
+                "next_due": "2025-06-28",
+                "last_completed_date": null,
+                "last_completed_by": null
+            }
+        ],
         "last_member": 0
     }
 }

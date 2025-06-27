@@ -80,3 +80,24 @@ ul li.item_menu a .icon > i{
     font-size: 30px;
     margin-left: 15px;
 }
+
+.logout-button {
+    display: flex; /* Para alinhar ícone e texto */
+    align-items: center;
+    padding: 10px 15px; /* Mesmo padding dos outros itens de menu */
+    width: 100%; /* Ocupa a largura total do li */
+    background: none; /* Remove o fundo padrão do botão */
+    border: none; /* Remove a borda padrão do botão */
+    color: #fff; /* Cor do texto e ícone, igual aos outros itens de menu */
+    font-family: 'Noto Sans', sans-serif; /* Mesma fonte do corpo */
+    font-size: 1rem; /* Mesmo tamanho de fonte */
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    text-align: left; /* Alinha o texto à esquerda */
+    box-sizing: border-box; /* Inclui padding na largura */
+}
+
+.logout-button:hover {
+    background-color: rgba(255,255,255,0.1); /* Efeito hover igual aos outros itens de menu */
+    color: #fff;
+}

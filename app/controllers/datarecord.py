@@ -1,5 +1,4 @@
 from app.models.user_account import UserAccount, SuperAccount
-from app.models.chore import Chore
 from app.models.user_message import UserMessage
 from app.models.house import House
 import json
@@ -143,11 +142,61 @@ class UserRecord():
                     self.__authenticated_users[session_id] = user
                     return session_id  # Retorna o ID de sessão para o usuário
         return None
+    
+    def updateUser(self, updated_user_obj):
+        """
+        Atualiza as informações de um usuário existente (exceto a senha, que pode ter um método separado).
+        Assume que updated_user_obj é uma instância de UserAccount ou SuperAccount
+        com as informações mais recentes.
+        """
+        found = False
+        for account_type in ['user_accounts', 'super_accounts']:
+            for i, user in enumerate(self.__allusers[account_type]):
+                if user.username == updated_user_obj.username:
+                    # Atualiza os atributos do usuário existente no registro
+                    self.__allusers[account_type][i].fullname = updated_user_obj.fullname
+                    self.__allusers[account_type][i].birthdate = updated_user_obj.birthdate
+                    self.__allusers[account_type][i].email = updated_user_obj.email
+                    self.__allusers[account_type][i].gender = updated_user_obj.gender
+                    # A senha é atualizada por setUser, não aqui, a menos que você queira consolidar.
+                    
+                    self.__write(account_type) # Salva o tipo de conta modificado
+                    print(f"Usuário {updated_user_obj.username} atualizado com sucesso em {account_type}.")
+                    found = True
+                    break
+            if found:
+                break
+        
+        if not found:
+            print(f"Erro: Usuário {updated_user_obj.username} não encontrado para atualização.")
+            return False
+        return True
+
+    # --- Ajuste opcional no setUser para clareza (já existente, só para referência) ---
+    def setUser(self, username, password):
+        """Edita a senha de um usuário existente."""
+        for account_type in ['user_accounts', 'super_accounts']:
+            for user in self.__allusers[account_type]:
+                if username == user.username:
+                    user.password = password
+                    print(f'O usuário {username} teve a senha editada com sucesso.')
+                    self.__write(account_type) # Salva a alteração da senha
+                    return username
+        print('O método setUser foi chamado, porém sem sucesso.')
+        return None
 
 
     def logout(self, session_id):
         if session_id in self.__authenticated_users:
             del self.__authenticated_users[session_id] # Remove o usuário logado
+
+    def user_exists(self, username): # <<< ADICIONE ESTE MÉTODO AQUI
+        """Verifica se um usuário com o dado username já existe no sistema."""
+        for account_type in ['user_accounts', 'super_accounts']:
+            for user in self.__allusers[account_type]:
+                if user.username == username:
+                    return True
+        return False
 
 
 class HouseRecord:

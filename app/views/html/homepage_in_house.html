@@ -12,6 +12,7 @@
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
    <script src="/static/js/menu.js" defer></script>
+   s
    </head>
 <body>
    <nav class="menu_lateral">
@@ -33,17 +34,18 @@
             </a>
          </li>
          <li class="item_menu">
-            <a href="#">
-               <span class="icon"><i class="bi bi-person"></i></span>
-               <span class="text_link">Perfil</span>
+            <a href="/profile"> <span class="icon"><i class="bi bi-person"></i></span>
+                <span class="text_link">Perfil</span>
             </a>
-         </li>
-         <li class="item_menu">
-            <a href="#">
-               <span class="icon"></span>
-               <span class="text_link"></span>
-            </a>
-         </li>
+        </li>
+        <li class="item_menu">
+            <form action="/logout" method="POST" style="margin: 0; padding: 0;">
+                <button type="submit" class="logout-button">
+                    <span class="icon"><i class="bi bi-box-arrow-right"></i></span>
+                    <span class="text_link">Sair</span>
+                </button>
+            </form>
+        </li>
       </ul>
    </nav>
 
