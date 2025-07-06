@@ -19,11 +19,6 @@
       </div>
       % if username:
       <div class= "object_centered">
-        % if edited:
-            <h4>Usuário logado: {{ username }} (editado) </h4>
-        % else:
-            <h4>Usuário logado: {{ username }} </h4>
-        % end
           <form action="/logout" method="post">
               <button type="submit">Logout</button>
           </form>

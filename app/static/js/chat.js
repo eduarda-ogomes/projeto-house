@@ -1,52 +1,79 @@
-const socket = io('http://localhost:8080'); // Endereço do servidor Socket.IO
+document.addEventListener('DOMContentLoaded', function() {
+    const socket = io(); // Conecta ao servidor Socket.IO
 
-// Seleciona o botão pelo ID
-const button = document.getElementById('sendButton');
+    const messagesContainer = document.getElementById('messages-container');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const currentUsername = document.getElementById('current-username') ? document.getElementById('current-username').value : 'Usuário Desconhecido';
+    const currentHouseId = document.getElementById('current-house-id') ? document.getElementById('current-house-id').value : null;
 
-socket.on('connect', () => {
-   console.log('Conexão estabelecida com o servidor Socket.IO');
-});
-
-// recebimentos das mensagens
-socket.on('message', (data) => {
-    displayMessage(data.content, data.username);
-});
-
-// recebimento de uma nova lista de usuários conectados
-socket.on('update_users_event', (data) => {
-    updateUserList(data.users)
-});
-
-// envio de solicitação para o servidor para que o mesmo possa devolver
-// a lista de mensagens atualizada
-function sendMessage() {
-    const messageInput = document.getElementById('messageInput');
-    const message = messageInput.value;
-    socket.emit('message', message);
-    messageInput.value = '';
-}
-
-function displayMessage(message, user) {
-    const messageDisplay = document.getElementById('messageDisplay');
-    if (messageDisplay) {
-        messageDisplay.innerHTML += `<li>${message} | escrita por: ${user}</li>`;
-    } else {
-        console.error('Elemento messageDisplay não encontrado');
+    function scrollToBottom() {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
-}
 
-function updateUserList(users) {
-    const usersDisplay = document.getElementById('usersDisplay');
-    if (usersDisplay) {
-        usersDisplay.innerHTML = '';
-        users.forEach(user => {
-            const listItem = document.createElement('li');
-            listItem.textContent = user.username;
-            usersDisplay.appendChild(listItem);
-        });
-    } else {
-        console.error('Elemento usersDisplay não encontrado');
+    function displayMessage(message) {
+        const messageItem = document.createElement('div');
+        messageItem.classList.add('message-item');
+
+        if (message.username === currentUsername) {
+            messageItem.classList.add('my-message');
+        } else {
+            messageItem.classList.add('other-message');
+        }
+
+        const usernameSpan = document.createElement('span');
+        usernameSpan.classList.add('message-username');
+        usernameSpan.textContent = message.username + ':';
+
+        const contentSpan = document.createElement('span');
+        contentSpan.classList.add('message-content');
+        contentSpan.textContent = message.content;
+
+        const timestampSpan = document.createElement('span');
+        timestampSpan.classList.add('message-timestamp');
+        timestampSpan.textContent = new Date(message.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+        messageItem.appendChild(usernameSpan);
+        messageItem.appendChild(contentSpan);
+        messageItem.appendChild(timestampSpan);
+        messagesContainer.appendChild(messageItem);
+
+        scrollToBottom();
     }
-}
 
-button.addEventListener('click', sendMessage);
+    socket.on('connect', function() {
+        console.log('Conectado ao servidor Socket.IO.');
+        if (currentHouseId) {
+            socket.emit('join_house_room', { house_id: currentHouseId });
+            console.log('Entrou na sala da casa:', currentHouseId);
+        } else {
+            console.warn('ID da casa não encontrada. Chat pode não funcionar.');
+        }
+    });
+
+    socket.on('new_house_message', function(msg) {
+        console.log('Mensagem recebida:', msg);
+        displayMessage(msg);
+    });
+
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    function sendMessage() {
+        const content = messageInput.value.trim();
+        if (content && currentHouseId && currentUsername) {
+            socket.emit('send_house_message', {
+                content,
+                house_id: currentHouseId,
+                username: currentUsername
+            });
+            messageInput.value = '';
+        }
+    }
+
+    scrollToBottom();
+});

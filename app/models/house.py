@@ -1,4 +1,3 @@
-# app/models/house.py
 import datetime
 
 class House:
@@ -6,8 +5,8 @@ class House:
         self.id = house_id
         self.name = name
         self.members = members if members is not None else []
-        self.chores = chores if chores is not None else [] # Agora armazena dicionários
-        self.last_member = last_member # Índice do último membro que completou uma tarefa rotativa
+        self.chores = chores if chores is not None else []
+        self.last_member = last_member
 
     def add_member(self, username):
         print(f"\n--- DEBUG: add_member para {self.name} ---")
@@ -23,13 +22,9 @@ class House:
                     print(f"last_member ({self.last_member}) >= num_members ({num_members}). Resetando para 0.")
                     self.last_member = 0
 
-                # Reatribuir tarefas sem atribuição ou com atribuição inválida
-                # Esta parte garante que tarefas órfãs sejam reatribuídas
                 for chore in self.chores:
-                    # Se a tarefa está sem atribuição ou atribuída a alguém que não está mais na casa
                     if chore.get('assigned_to') == 'Ninguém' or chore.get('assigned_to') not in self.members:
                         print(f"DEBUG: Reatribuindo tarefa '{chore.get('activity')}' de '{chore.get('assigned_to')}'")
-                        # Atribui ao próximo na rotação (considerando o novo membro para reatribuições)
                         assigned_member = self.members[self.last_member]
                         chore['assigned_to'] = assigned_member
                         print(f"DEBUG: Atribuído a: {assigned_member}")
@@ -42,8 +37,6 @@ class House:
         print(f"last_member DEPOIS de adicionar: {self.last_member}")
         print(f"--- FIM DEBUG: add_member ---\n")
 
-
-    # --- MODIFICAÇÃO AQUI: add_chore para distribuição justa ---
     def add_chore(self, activity, date_str, rotation_days=0, next_due=None, last_completed_date=None, last_completed_by=None):
         print(f"\n--- DEBUG: add_chore para {self.name} (Distribuição Justa) ---")
         print(f"Membros atuais: {self.members}")
@@ -91,19 +84,14 @@ class House:
                 
                 if candidate_member in least_busy_members:
                     assigned_to = candidate_member
-                    # --- AQUI ESTÁ A MUDANÇA ---
-                    # Incrementa last_member para o PRÓXIMO DA FILA após a atribuição
-                    # Isso garante que a próxima busca por "menos ocupados" comece de um novo ponto
                     self.last_member = (self.last_member + 1) % num_members 
                     found_assignee = True
                     break
             
             if not found_assignee:
-                # Fallback, caso algo dê errado na lógica de menos ocupados (improvável com num_members > 0)
                 assigned_to = self.members[self.last_member]
                 self.last_member = (self.last_member + 1) % num_members
                 print("DEBUG: Fallback para rotação simples, não encontrou menos ocupado.")
-
 
         print(f"Tarefa '{activity}' atribuída a: {assigned_to}")
         print(f"last_member APÓS incremento (para próxima tarefa): {self.last_member}")
@@ -131,25 +119,19 @@ class House:
         self.chores.append(new_chore)
         print(f"--- FIM DEBUG: add_chore ---\n")
         return True
-
     
     def remove_member(self, username):
         if username in self.members:
             self.members.remove(username)
-            # Ajustar o índice se o membro removido afetar a rotação
             if self.last_member >= len(self.members) and len(self.members) > 0:
                 self.last_member = 0
 
-            # Reatribuir tarefas do membro removido
             for chore in self.chores:
                 if chore.get('assigned_to') == username:
-                    # Reatribui ao primeiro membro restante ou a 'Ninguém'
                     chore['assigned_to'] = self.members[0] if self.members else 'Ninguém'
-                    # Limpa informações de conclusão se foi ele quem concluiu
                     if chore.get('last_completed_by') == username:
                         chore['last_completed_by'] = None
                         chore['last_completed_date'] = None
-
 
     def complete_chore(self, activity, completed_by_username):
         for chore in self.chores:
@@ -157,7 +139,6 @@ class House:
                 chore['last_completed_date'] = datetime.date.today().strftime('%Y-%m-%d')
                 chore['last_completed_by'] = completed_by_username
                 
-                # Se a tarefa tem rotação, calcula o próximo vencimento
                 if chore.get('rotation_days') and chore['rotation_days'] > 0:
                     current_next_due = datetime.datetime.strptime(chore['next_due'], '%Y-%m-%d').date()
                     chore['next_due'] = (current_next_due + datetime.timedelta(days=chore['rotation_days'])).strftime('%Y-%m-%d')

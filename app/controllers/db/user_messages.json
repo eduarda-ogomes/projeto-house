@@ -37,7 +37,7 @@
     },
     {
         "username": "Moura",
-        "content": "S\u00e9tima mensagem",
+        "content": "Sétima mensagem",
         "house_id": "general",
         "timestamp": "2025-07-06 11:34:05"
     },
@@ -55,7 +55,7 @@
     },
     {
         "username": "Henrique",
-        "content": "D\u00e9cima mensagem",
+        "content": "Décima mensagem",
         "house_id": "general",
         "timestamp": "2025-07-06 11:34:05"
     },
@@ -85,7 +85,7 @@
     },
     {
         "username": "Moura",
-        "content": "E vc a\u00ed?",
+        "content": "E vc aí?",
         "house_id": "general",
         "timestamp": "2025-07-06 11:34:05"
     },
@@ -97,7 +97,7 @@
     },
     {
         "username": "Moura",
-        "content": "Porque eu n\u00e3o disparo?",
+        "content": "Porque eu não disparo?",
         "house_id": "general",
         "timestamp": "2025-07-06 11:34:05"
     },
@@ -121,7 +121,7 @@
     },
     {
         "username": "Henrique",
-        "content": "Ol\u00e1 Henrique",
+        "content": "Olá Henrique",
         "house_id": "general",
         "timestamp": "2025-07-06 11:34:05"
     },
@@ -139,19 +139,19 @@
     },
     {
         "username": "Moura",
-        "content": "Ol\u00e1 Henrique!",
+        "content": "Olá Henrique!",
         "house_id": "general",
         "timestamp": "2025-07-06 11:34:05"
     },
     {
         "username": "Moura",
-        "content": "Ol\u00e1 Sr. Moura",
+        "content": "Olá Sr. Moura",
         "house_id": "general",
         "timestamp": "2025-07-06 11:34:05"
     },
     {
         "username": "Henrique",
-        "content": "Ol\u00e1 Gomes",
+        "content": "Olá Gomes",
         "house_id": "general",
         "timestamp": "2025-07-06 11:34:05"
     },
@@ -202,5 +202,59 @@
         "content": "estou bem",
         "house_id": "9a0be21b-e411-4e4a-985a-f1b84b638712",
         "timestamp": "2025-07-06 11:49:25"
+    },
+    {
+        "username": "dudaggms",
+        "content": "hi",
+        "house_id": "9a0be21b-e411-4e4a-985a-f1b84b638712",
+        "timestamp": "2025-07-06 12:20:31"
+    },
+    {
+        "username": "dudaggms",
+        "content": "hi",
+        "house_id": "9a0be21b-e411-4e4a-985a-f1b84b638712",
+        "timestamp": "2025-07-06 12:25:31"
+    },
+    {
+        "username": "dudaggms",
+        "content": "testando",
+        "house_id": "9a0be21b-e411-4e4a-985a-f1b84b638712",
+        "timestamp": "2025-07-06 12:30:11"
+    },
+    {
+        "username": "carolzinha",
+        "content": "hello",
+        "house_id": "9a0be21b-e411-4e4a-985a-f1b84b638712",
+        "timestamp": "2025-07-06 12:30:30"
+    },
+    {
+        "username": "dudaggms",
+        "content": "bay",
+        "house_id": "9a0be21b-e411-4e4a-985a-f1b84b638712",
+        "timestamp": "2025-07-06 12:32:59"
+    },
+    {
+        "username": "dudaggms",
+        "content": "oi",
+        "house_id": "030e7100-5d19-4950-8466-b3edbfe3bec3",
+        "timestamp": "2025-07-06 12:52:21"
+    },
+    {
+        "username": "dudaggms",
+        "content": "tudo bem?",
+        "house_id": "030e7100-5d19-4950-8466-b3edbfe3bec3",
+        "timestamp": "2025-07-06 13:23:33"
+    },
+    {
+        "username": "livia",
+        "content": "hello",
+        "house_id": "030e7100-5d19-4950-8466-b3edbfe3bec3",
+        "timestamp": "2025-07-06 13:30:44"
+    },
+    {
+        "username": "dudaggms",
+        "content": "bem vinda",
+        "house_id": "030e7100-5d19-4950-8466-b3edbfe3bec3",
+        "timestamp": "2025-07-06 13:33:33"
     }
 ]
