@@ -1,47 +1,62 @@
+# datarecord.py
 from app.models.user_account import UserAccount, SuperAccount
-from app.models.user_message import UserMessage
+from app.models.user_message import UserMessage # Certifique-se de que este caminho está correto
 from app.models.house import House
 import json
 import uuid
-
+import datetime # Adicionado para o timestamp das mensagens
 
 class MessageRecord():
     """Banco de dados JSON para o recurso: Mensagem"""
 
     def __init__(self):
-        self.__user_messages= []
+        self.__user_messages = []
         self.read()
 
     def read(self):
         try:
             with open("app/controllers/db/user_messages.json", "r") as fjson:
-                user_msg = json.load(fjson)
-                self.__user_messages = [UserMessage(**msg) for msg in user_msg]
+                user_msg_data = json.load(fjson)
+                # Garante que cada mensagem lida do JSON tenha um house_id
+                # e um timestamp, se não existirem (para compatibilidade com dados antigos)
+                self.__user_messages = [
+                    UserMessage(
+                        username=msg.get('username'),
+                        content=msg.get('content'),
+                        house_id=msg.get('house_id', 'general'), # Valor padrão 'general' para mensagens sem casa
+                        timestamp=msg.get('timestamp')
+                    ) for msg in user_msg_data
+                ]
         except FileNotFoundError:
             print('Não existem mensagens registradas!')
+        except json.JSONDecodeError: # Adiciona tratamento para JSON inválido
+            print('Erro ao decodificar JSON de mensagens. Iniciando com lista vazia.')
+            self.__user_messages = []
 
 
     def __write(self):
         try:
             with open("app/controllers/db/user_messages.json", "w") as fjson:
-                user_msg = [vars(user_msg) for user_msg in \
-                self.__user_messages]
-                json.dump(user_msg, fjson)
+                # Usa o método to_dict() do UserMessage para garantir o formato correto
+                user_msg_serializable = [msg.to_dict() for msg in self.__user_messages]
+                json.dump(user_msg_serializable, fjson, indent=4) # Adicionado indent para legibilidade
                 print(f'Arquivo gravado com sucesso (Mensagem)!')
         except FileNotFoundError:
             print('O sistema não conseguiu gravar o arquivo (Mensagem)!')
 
 
-    def book(self,username,content):
-        new_msg= UserMessage(username,content)
+    def book(self, username, content, house_id): # Adicionado house_id
+        new_msg = UserMessage(username, content, house_id) # Passa house_id para o construtor
         self.__user_messages.append(new_msg)
         self.__write()
         return new_msg
 
 
-    def getUsersMessages(self):
+    def getUsersMessages(self): # Manter se ainda houver um chat "geral"
         return self.__user_messages
 
+    def getHouseMessages(self, house_id): # Novo método para obter mensagens de uma casa específica
+        return [msg for msg in self.__user_messages if msg.house_id == house_id]
 
 # ------------------------------------------------------------------------------
 
@@ -79,7 +94,7 @@ class UserRecord():
             with open(f"app/controllers/db/{database}.json", "w") as fjson:
                 user_data = [vars(user_account) for user_account in \
                 self.__allusers[database]]
-                json.dump(user_data, fjson)
+                json.dump(user_data, fjson, indent=4) # Adicionado indent para legibilidade
                 print(f'Arquivo gravado com sucesso (Usuário)!')
         except FileNotFoundError:
             print('O sistema não conseguiu gravar o arquivo (Usuário)!')
@@ -110,17 +125,23 @@ class UserRecord():
         return None
 
 
-    def book(self, fullname, username, birthdate, email, password, confirm_password, gender, permissions):
+    def book(self, fullname, username, birthdate, email, password, confirm_password, gender, permissions=None): # permissions é opcional no cadastro
         account_type = 'super_accounts' if permissions else 'user_accounts'
         account_class = SuperAccount if permissions else UserAccount
-        new_user = account_class(fullname, username, birthdate, email, password, gender, permissions) if permissions else account_class(fullname, username, birthdate, email, password, gender)
+        # O construtor UserAccount não aceita permissions, então passamos apenas se for SuperAccount
+        if permissions:
+            new_user = account_class(fullname, username, birthdate, email, password, gender, permissions)
+        else:
+            new_user = account_class(fullname, username, birthdate, email, password, gender)
+        
         self.__allusers[account_type].append(new_user)
         self.__write(account_type)
         return new_user.username
 
 
     def getUserAccounts(self):
-        return self.__allusers['user_accounts']
+        # Combina e retorna todos os usuários (normais e super)
+        return self.__allusers['user_accounts'] + self.__allusers['super_accounts']
 
 
     def getCurrentUser(self,session_id):
@@ -190,7 +211,7 @@ class UserRecord():
         if session_id in self.__authenticated_users:
             del self.__authenticated_users[session_id] # Remove o usuário logado
 
-    def user_exists(self, username): # <<< ADICIONE ESTE MÉTODO AQUI
+    def user_exists(self, username):
         """Verifica se um usuário com o dado username já existe no sistema."""
         for account_type in ['user_accounts', 'super_accounts']:
             for user in self.__allusers[account_type]:
@@ -257,47 +278,4 @@ class HouseRecord:
     def list_houses(self):
         """Retorna lista de casas com id e nome, para escolha do usuário"""
         return [{'id': house_id, 'name': house.name} for house_id, house in self.houses.items()]
-class ChoreRecord:
-    """Manages chores and their associations with houses and users"""
 
-    def __init__(self):
-        self.chores = {}
-        # self.load() # Comentei para evitar erro se 'app/models/chore.py' não existir ou for simples demais
-
-    def load(self):
-        try:
-            with open('app/controllers/db/chores.json', 'r') as f:
-                chores_data = json.load(f)
-                self.chores = {
-                    chore_id: chore # Carrega como dicionário
-                    for chore_id, chore in chores_data.items()
-                }
-        except (FileNotFoundError, json.JSONDecodeError):
-            self.chores = {}
-
-    def save(self):
-        with open('app/controllers/db/chores.json', 'w') as f:
-            # Salva como dicionário
-            json.dump(self.chores, f, indent=4)
-
-    def create_chore(self, activity, date, status='pending'):
-        chore_id = str(uuid.uuid4())
-        new_chore = { # Cria um dicionário
-            'activity': activity,
-            'date': date,
-            'status': status,
-        }
-        self.chores[chore_id] = new_chore
-        self.save()
-        return chore_id
-
-    def get_chores_by_house(self, house_id):
-        # Se você quiser rastrear tarefas por casa, adicione house_id ao modelo de tarefa
-        return [chore for chore in self.chores.values()]
-
-    def get_chores_by_user(self, username):
-        return [
-            {'id': cid, 'activity': chore['activity'], 'date': chore['date'], 'status': chore['status']}
-            for cid, chore in self.chores.items()
-            if chore.get('responsable') == username # Assumindo que 'responsable' está no dicionário
-        ]
