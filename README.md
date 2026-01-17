@@ -76,8 +76,8 @@ Desenvolvido como projeto final de **Orientação a Objetos** na Universidade de
 
 **Autenticação**
 
-![Login](img/login.png)
-![Cadastro](img/cadastro.png)
+![Login](img/login.png) | ![Cadastro](img/cadastro.png)
+---|---
 
 **Dashboard Principal**
 
@@ -85,8 +85,8 @@ Desenvolvido como projeto final de **Orientação a Objetos** na Universidade de
 
 **Gerenciamento de Casa e Perfil**
 
-![Criar/Entrar Casa](img/cadastro_casa.png)
-![Perfil](img/perfil.png)
+![Criar/Entrar Casa](img/cadastro_casa.png) | ![Perfil](img/perfil.png)
+---|---
 
 **Comunicação em Tempo Real**
 
@@ -108,7 +108,7 @@ Desenvolvido como projeto final de **Orientação a Objetos** na Universidade de
 ### Frontend
 - **HTML5** — Estrutura semântica
 - **CSS3** — Layout com Flexbox e design responsivo
-- **JavaScript (Vanilla)** — Sem dependências externas, código puro
+- **JavaScript** — Sem dependências externas, código puro
 - **Socket.IO Client** — Cliente WebSocket para chat
 
 ### Banco de Dados
@@ -121,24 +121,24 @@ Desenvolvido como projeto final de **Orientação a Objetos** na Universidade de
 
 ## 📂 Estrutura do Projeto
 
-\`\`\`
+```
 projeto-house/
 ├── app/
 │   ├── controllers/
-│   │   ├── application.py    # Lógica principal das rotas e WebSocket
-│   │   ├── datarecord.py     # Camada de persistência (CRUD em JSON)
-│   │   └── db/               # Arquivos .json (banco de dados)
-│   ├── models/               # Classes de modelo (User, House, Message, Chore)
+│   │   ├── application.py
+│   │   ├── datarecord.py
+│   │   └── db/
+│   ├── models/
 │   ├── static/
-│   │   ├── css/              # Estilos (style.css)
-│   │   ├── js/               # Scripts (script.js, socket-handler.js)
-│   │   └── img/              # Imagens e ícones
-│   └── views/                # Templates HTML (index.html, dashboard.html, etc)
-├── img/                      # Screenshots para o README
-├── main.py                   # Ponto de entrada da aplicação
-├── requirements.txt          # Dependências do projeto
-└── README.md                 # Este arquivo
-\`\`\`
+│   │   ├── css/
+│   │   ├── js/
+│   │   └── img/
+│   └── views/
+├── img/
+├── main.py
+├── requirements.txt
+└── README.md
+```
 
 ---
 
@@ -148,49 +148,34 @@ projeto-house/
 
 - **Python 3.x** (recomendado Python 3.9+)
 - **pip** (gerenciador de pacotes Python)
-- Navegador web moderno (Chrome, Firefox, Safari, Edge)
 
 ### Instalação
 
 #### 1️⃣ Clone o repositório
 
-\`\`\`bash
+```bash
 git clone https://github.com/eduarda-ogomes/projeto-house.git
 cd projeto-house
-\`\`\`
-
-#### 2️⃣ Crie um ambiente virtual (Recomendado)
-
-**No Windows:**
-\`\`\`bash
-python -m venv venv
-venv\Scripts\activate
-\`\`\`
-
-**No Linux/Mac:**
-\`\`\`bash
-python -m venv venv
-source venv/bin/activate
-\`\`\`
+```
 
 #### 3️⃣ Instale as dependências
 
-\`\`\`bash
+```bash
 pip install -r requirements.txt
-\`\`\`
+```
 
 Ou instale manualmente:
-\`\`\`bash
+```bash
 pip install bottle python-socketio eventlet bcrypt
-\`\`\`
+```
 
 #### 4️⃣ Execute a aplicação
 
-\`\`\`bash
+```bash
 python main.py
-\`\`\`
+```
 
-✅ O servidor iniciará em \`http://localhost:8080\`
+✅ O servidor iniciará em `http://localhost:8080`
 
 Acesse no seu navegador e comece a organizar sua república!
 
@@ -257,11 +242,13 @@ Este projeto foi desenvolvido como **Projeto Final** de **Orientação a Objetos
 
 ## 💜 Créditos
 
-Desenvolvido com 💜 por **Duda** ([eduarda-ogomes](https://github.com/eduarda-ogomes)) e **Rodrigo** ([RodrigoDutraF88](ttps://github.com/RodrigoDutraF88))
+Desenvolvido por:
+- **Duda** ([eduarda-ogomes](https://github.com/eduarda-ogomes))
+- **Rodrigo** ([RodrigoDutraF88](https://github.com/RodrigoDutraF88))
 
 **Universidade:** Universidade de Brasília (UnB)  
 **Disciplina:** Orientação a Objetos  
-**Data:** 2025
+**Data:** 2026
 
 ### Inspiração
 
