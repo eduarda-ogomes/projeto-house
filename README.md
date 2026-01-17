@@ -88,10 +88,6 @@ Desenvolvido como projeto final de **Orientação a Objetos** na Universidade de
 ![Criar/Entrar Casa](img/cadastro_casa.png) | ![Perfil](img/perfil.png)
 ---|---
 
-**Comunicação em Tempo Real**
-
-![Chat](img/chat.png)
-
 </div>
 
 ---
