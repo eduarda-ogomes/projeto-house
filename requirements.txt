@@ -1,0 +1,5 @@
+bottle==0.12.25
+python-socketio==5.10.0
+python-engineio==4.8.0
+eventlet==0.33.3
+bcrypt==4.1.1

@@ -3,48 +3,59 @@
         "id": "030e7100-5d19-4950-8466-b3edbfe3bec3",
         "name": "republica",
         "members": [
-            "dudaggms",
             "carolzinha",
-            "livia"
+            "livia",
+            "dudaggms"
         ],
         "chores": [
             {
-                "activity": "limpar vararanda",
-                "date": "2025-07-24",
-                "assigned_to": "dudaggms",
-                "rotation_days": 4,
-                "next_due": "2025-08-01",
-                "last_completed_date": "2025-07-06",
-                "last_completed_by": "dudaggms"
-            },
-            {
-                "activity": "bancada",
-                "date": "2025-07-09",
-                "assigned_to": "dudaggms",
-                "rotation_days": 2,
-                "next_due": "2025-07-13",
-                "last_completed_date": "2025-07-06",
-                "last_completed_by": "dudaggms"
-            },
-            {
-                "activity": "limpar cozinha",
-                "date": "2025-07-30",
+                "activity": "limpar banheiro",
+                "date": "2026-01-24",
                 "assigned_to": "carolzinha",
-                "rotation_days": 5,
-                "next_due": "2025-08-04",
+                "rotation_days": 7,
+                "next_due": "2026-01-31",
                 "last_completed_date": null,
                 "last_completed_by": null
             },
             {
-                "activity": "limpar banheiro",
-                "date": "2025-07-02",
+                "activity": "limpar vararanda",
+                "date": "2026-01-20",
+                "assigned_to": "livia",
+                "rotation_days": 14,
+                "next_due": "2026-02-03",
+                "last_completed_date": null,
+                "last_completed_by": null
+            },
+            {
+                "activity": "limpar cozinha",
+                "date": "2026-01-10",
                 "assigned_to": "dudaggms",
-                "rotation_days": 5,
-                "next_due": "2025-07-07",
+                "rotation_days": 7,
+                "next_due": "2026-01-17",
                 "last_completed_date": null,
                 "last_completed_by": null
             }
         ],
         "last_member": 1
+    },
+    "5fafd93b-cbc0-4339-ba75-d4f50c969174": {
+        "id": "5fafd93b-cbc0-4339-ba75-d4f50c969174",
+        "name": "divas da rep",
+        "members": [
+            "nanda",
+            "cibas"
+        ],
+        "chores": [
+            {
+                "activity": "limpar banheiro",
+                "date": "2025-07-13",
+                "assigned_to": "nanda",
+                "rotation_days": 7,
+                "next_due": "2025-07-27",
+                "last_completed_date": "2025-07-06",
+                "last_completed_by": "nanda"
+            }
+        ],
+        "last_member": 0
     }
 }

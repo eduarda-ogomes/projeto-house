@@ -105,3 +105,28 @@ img:hover {
     display: flex; /* Define o contêiner como flexível */
     gap: 10px; /* Espaçamento entre os botões */
 }
+
+.status-message {
+    padding: 10px 15px;
+    margin-top: 20px; /* Espaço entre o formulário e a mensagem */
+    border-radius: 8px;
+    font-size: 1em;
+    text-align: center;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out; /* Transição suave para aparecer/desaparecer */
+}
+
+/* Estilos específicos para mensagens de sucesso */
+.status-message-success {
+    background-color: #d4edda; /* Verde claro */
+    color: #155724; /* Texto verde escuro */
+    border: 1px solid #c3e6cb;
+}
+
+/* Estilos específicos para mensagens de remoção (opcional, se você usar) */
+.status-message-removed {
+    background-color: #f8d7da; /* Vermelho claro */
+    color: #721c24; /* Texto vermelho escuro */
+    border: 1px solid #f5c6cb;
+}

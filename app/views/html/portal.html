@@ -5,11 +5,9 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Login</title>
 
-   <!-- Arquivo CSS -->
    <link rel="stylesheet" href="/static/css/login.css">
 
-   <!-- Arquivo JavaScript -->
-   <script src="/static/js/login.js" defer></script>
+   <script src="/static/js/portal.js" defer></script>
 </head>
 <body>
    <div class="main_login">
@@ -30,12 +28,6 @@
           </form>
       </div>
     % else:
-        % if removed is not None:
-            <h4>O usuário {{ removed }} foi removido deste cadastro.</h4>
-        % elif created is not None:
-            <h4>O usuário {{ created }} foi criado neste cadastro.</h4>
-        % end
-
       <div class="rigth_login">
         <form action="/portal" method="post">
             <div class="card_login">
@@ -56,6 +48,8 @@
             </label>
          </div>
         </form>
+        <div id="status-message" class="status-message" style="display: none;">
+        </div>
       </div>
     % end
    </div>
