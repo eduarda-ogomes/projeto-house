@@ -119,8 +119,6 @@ class Application:
                 return template(
                     'app/views/html/cadastro', 
                     error=f"Por favor, preencha todos os campos obrigatórios. Campos faltando: {', '.join(missing_fields).replace('_', ' ').title()}.",
-                    # Opcional: passa de volta os dados que foram preenchidos (exceto senha)
-                    # Para preencher o formulário novamente com os dados válidos
                     fullname=fullname, username=username, birthdate=birthdate, 
                     email=email, gender=gender
                 )
@@ -144,7 +142,7 @@ class Application:
                     email=email, gender=gender
                 )
 
-            # --- VALIDAÇÃO DE FORMATO DE E-MAIL (Exemplo) ---
+            # --- VALIDAÇÃO DE FORMATO DE E-MAIL  ---
             if '@' not in email or '.' not in email:
                 print("Formato de e-mail inválido.")
                 return template(
@@ -154,8 +152,7 @@ class Application:
                     email=email, gender=gender
                 )
 
-            # --- Continua com o processamento se todas as validações passarem ---
-            fullname = fullname.title() # Aplica a formatação de título
+            fullname = fullname.title() 
 
             self.insert_user(fullname, username, birthdate, email, password, gender)
             # Redireciona para o portal após o cadastro bem-sucedido
