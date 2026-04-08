@@ -1,22 +1,16 @@
 import json
 import uuid
-import os # Importar para verificar existência de arquivos/diretórios
+import os 
 
-# Suas importações originais, sem modificações de caminho
-from app.models.user_account import UserAccount, SuperAccount # Adicionado SuperAccount para completude
+from app.models.user_account import UserAccount, SuperAccount 
 from app.models.user_message import UserMessage
-from app.models.house import House # Mantido "House" como você tinha
+from app.models.house import House
 
-import bcrypt # Adicionado para hashing de senhas, crucial para segurança
+import bcrypt 
 
-# Seus caminhos de arquivo originais
-# Certifique-se de que o diretório 'app/controllers/db/' exista
 USER_ACCOUNTS_FILE = "app/controllers/db/user_accounts.json"
 MESSAGES_FILE = "app/controllers/db/user_messages.json"
-HOUSES_FILE = "app/controllers/db/houses.json"
-
-# --- Funções Auxiliares para Leitura/Escrita de JSON (Adaptadas) ---
-# Estas funções ajudam a centralizar a lógica de arquivo para evitar repetição.
+HOUSES_FILE = "app/controllers/db/houses.json" 
 
 def _load_json_data(filepath, default_type):
     """
@@ -25,19 +19,18 @@ def _load_json_data(filepath, default_type):
     """
     if not os.path.exists(filepath):
         print(f"Arquivo '{filepath}' não encontrado. Criando um novo.")
-        _write_json_data(filepath, default_type()) # Cria o arquivo
+        _write_json_data(filepath, default_type()) 
         return default_type()
     
     try:
         with open(filepath, "r", encoding='utf-8') as f:
             content = f.read().strip()
-            if not content: # Arquivo está vazio
+            if not content: 
                 print(f"Arquivo '{filepath}' está vazio. Iniciando com {default_type.__name__} vazio.")
                 return default_type()
             return json.loads(content)
     except json.JSONDecodeError as e:
         print(f"Erro ao decodificar JSON de '{filepath}': {e}. Iniciando com {default_type.__name__} vazio.")
-        # Opcional: Você pode querer renomear o arquivo corrompido aqui para backup
         return default_type()
     except Exception as e:
         print(f"Erro ao ler arquivo '{filepath}': {e}. Iniciando com {default_type.__name__} vazio.")
@@ -52,7 +45,6 @@ def _write_json_data(filepath, data):
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         with open(filepath, "w", encoding='utf-8') as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
-        # print(f"Dados salvos com sucesso em '{filepath}'") # Comentado para menos logs
     except Exception as e:
         print(f"Erro ao escrever dados em '{filepath}': {e}")
 
@@ -109,15 +101,11 @@ class UserRecord:
         self.__all_users = {} 
 
         for username_key, data in user_data_dict.items():
-            # Tenta pegar 'password_hash'. Se não existir, tenta 'password' (para compatibilidade)
             password_value = data.get('password_hash')
             if password_value is None:
-                password_value = data.get('password') # Se 'password_hash' não existir, tenta 'password' original
+                password_value = data.get('password')
+            session_id_value = data.get('session_id')
 
-            session_id_value = data.get('session_id') # Carrega session_id, pode ser None
-
-            # Decide se é UserAccount ou SuperAccount baseado no username ou outra propriedade
-            # 'admin' é um exemplo, você pode ter uma flag 'isAdmin' no JSON
             if username_key == 'admin' or data.get('isAdmin', False): 
                 user_obj = SuperAccount(
                     fullname=data.get('fullname', 'Admin Default'),
@@ -143,10 +131,9 @@ class UserRecord:
             self.__all_users[username_key] = user_obj
             
             # Se o usuário tiver um session_id salvo (e válido), considere-o autenticado
-            if session_id_value: # Você pode adicionar uma validação de tempo/expiração aqui
+            if session_id_value:
                 self.__authenticated_users[session_id_value] = user_obj
 
-        # Adiciona um usuário padrão 'guest' se o sistema estiver vazio após carregar
         if not self.__all_users:
             guest_user = UserAccount('Guest User', 'guest', '2000-01-01', 'guest@example.com', self._hash_password('000000'), 'Outro', permissions=['guest'])
             self.__all_users[guest_user.username] = guest_user
@@ -162,7 +149,6 @@ class UserRecord:
 
     def _hash_password(self, password):
         """Hasheia uma senha usando bcrypt."""
-        # bcrypt.gensalt() gera um salt único para cada hash, tornando-o mais seguro.
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     def _check_password(self, password, stored_hash):
@@ -177,11 +163,8 @@ class UserRecord:
             # Tenta verificar como um hash bcrypt
             return bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
         except ValueError:
-            # Se ValueError, stored_hash não é um hash bcrypt válido.
-            # Pode ser uma senha em texto puro de uma versão antiga.
-            # ESTE BLOCO DEVE SER REMOVIDO APÓS A MIGRAÇÃO DE TODAS AS SENHAS.
             print("AVISO: Hash inválido encontrado (provavelmente senha antiga não hasheada). Comparando como texto puro.")
-            return password == stored_hash # Apenas para compatibilidade de migração
+            return password == stored_hash 
 
     def book(self, fullname, username, birthdate, email, password, gender, permissions=None):
         """
@@ -268,7 +251,6 @@ class UserRecord:
             self.__all_users[updated_user_obj.username].email = updated_user_obj.email
             self.__all_users[updated_user_obj.username].gender = updated_user_obj.gender
             self.__all_users[updated_user_obj.username].permissions = updated_user_obj.permissions
-            # password_hash e session_id não devem ser alterados aqui
 
             self.__write_all_users()
             print(f"Usuário {updated_user_obj.username} atualizado com sucesso.")
@@ -317,8 +299,8 @@ class HouseRecord:
 
     def save(self):
         houses_data = {
-            house.id: { # Use house.id como chave principal
-                'id': house.id, # Inclua o ID dentro do dicionário também
+            house.id: { 
+                'id': house.id, 
                 'name': house.name,
                 'members': house.members,
                 'chores': house.chores,
