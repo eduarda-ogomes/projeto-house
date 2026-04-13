@@ -244,7 +244,7 @@ Desenvolvido por:
 
 **Universidade:** Universidade de Brasília (UnB)  
 **Disciplina:** Orientação a Objetos  
-**Data:** 2026
+**Data:** 2025
 
 ### Inspiração
 
